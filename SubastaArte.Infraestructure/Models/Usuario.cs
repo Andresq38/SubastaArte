@@ -11,7 +11,11 @@ public partial class Usuario
 
     public string Password { get; set; } = null!;
 
-    public string NombreCompleto { get; set; } = null!;
+    public string Nombre { get; set; } = null!;
+
+    public string Apellido1 { get; set; } = null!;
+
+    public string? Apellido2 { get; set; }
 
     public int IdRol { get; set; }
 

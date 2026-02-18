@@ -283,8 +283,14 @@ public partial class SubastasContext : DbContext
             entity.Property(e => e.FechaRegistro)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
-            entity.Property(e => e.NombreCompleto)
-                .HasMaxLength(150)
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(80)
+                .IsUnicode(false);
+            entity.Property(e => e.Apellido1)
+                .HasMaxLength(80)
+                .IsUnicode(false);
+            entity.Property(e => e.Apellido2)
+                .HasMaxLength(80)
                 .IsUnicode(false);
             entity.Property(e => e.Password)
                 .HasMaxLength(200)
