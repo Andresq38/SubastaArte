@@ -16,6 +16,7 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        _logger.LogInformation("Entrando al método Index del HomeController");
         return View();
     }
 
