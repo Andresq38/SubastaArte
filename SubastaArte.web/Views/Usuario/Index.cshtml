@@ -1,83 +1,130 @@
 ﻿@model IEnumerable<SubastaArte.Application.DTOs.UsuarioDTO>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Usarios";
+    var total = Model?.Count() ?? 0;
+
 }
 
-<h1>Index</h1>
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Autores</h1>
+        <p class="text-muted mb-0">Administración de Usuarios registrados.</p>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.IdUsuario)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Password)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Apellido1)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Apellido2)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdRol)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdEstadoUsuario)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaRegistro)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdUsuario)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Password)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Apellido1)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Apellido2)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdRolNavigation.Descripcion)
-            </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.IdEstadoUsuarioNavigation.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaRegistro)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge text-bg-secondary" title="Total de usuarios">@total </span>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Nuevo usuario
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+        <span class="fw-semibold">Listado</span>
+    </div>
+
+    <div class="card-body p-0">
+
+        @* Sin registros *@
+        @if (Model == null || !Model.Any())
+        {
+            <div class="p-4 text-center">
+                <div class="display-6 mb-2">
+                    <i class="bi bi-person-x"></i>
+                </div>
+                <h2 class="h5">No hay usuarios registrados</h2>
+                <p class="text-muted mb-3">Crea el primer usuario para iniciar el catálogo.</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Crear usuario
+                </a>
+            </div>
+            @* Sin registros *@
+        }
+        else
+        {
+
+            @* Listado *@
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light position-sticky top-0" style="z-index:1;">
+                        <tr>
+                            <th scope="col" class="ps-3" style="width: 120px;">
+                                @Html.DisplayNameFor(model => model.IdUsuario)
+                            </th>
+                            <th scope="col">
+                                @Html.DisplayNameFor(model => model.Nombre)
+                            </th>
+                            <th scope="col">
+                                @Html.DisplayNameFor(model => model.Email)
+                            </th>
+                            <th scope="col">
+                                @Html.DisplayNameFor(model => model.IdRolNavigation.Descripcion)
+                            </th>
+                            <th scope="col">
+                                @Html.DisplayNameFor(model => model.IdEstadoUsuarioNavigation.Nombre)
+                            </th>
+                            <th scope="col" class="text-end pe-3" style="width: 260px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            @* Item Usuario *@
+                            <tr>
+                                <td class="ps-3">
+                                    <span class="badge text-bg-light border">@item.IdUsuario</span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@item.Nombre @item.Apellido1 @item.Apellido2</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@item.Email</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@item.IdRolNavigation.Descripcion</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@item.IdEstadoUsuarioNavigation.Nombre</div>
+                                </td>
+
+                                <td class="text-end pe-3">
+                                    <div class="btn-group" role="group" aria-label="Acciones del usuario ">
+                                        <a asp-action="Details" asp-route-id="@item.IdUsuario"
+                                           class="btn btn-outline-primary btn-sm"
+                                           title="Ver detalle">
+                                            <i class="bi bi-eye"></i>
+                                            <span class="d-none d-lg-inline ms-1">Detalle</span>
+                                        </a>
+
+                                        <a asp-action="Edit"
+                                           class="btn btn-outline-primary btn-sm"
+                                           title="Editar">
+                                            <i class="bi bi-pencil-square"></i>
+                                            <span class="d-none d-lg-inline ms-1">Editar</span>
+                                        </a>
+
+                                        <a asp-action="Delete"
+                                           class="btn btn-outline-danger btn-sm"
+                                           title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                            <span class="d-none d-lg-inline ms-1">Eliminar</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            @* Item Usuario *@
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @* Listado *@
+        }
+    </div>
+    @* Total *@
+    <div class="card-footer bg-body d-flex justify-content-between align-items-center small text-muted">
+        <span>Total: <strong> @total </strong> autor(es)</span>
+    </div>
+</div>
+

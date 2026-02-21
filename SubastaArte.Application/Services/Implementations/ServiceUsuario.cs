@@ -21,9 +21,11 @@ namespace SubastaArte.Application.Services.Implementations
             _mapper = mapper;
         }
 
-        public Task<UsuarioDTO?> FindByIdAsync(int id)
+        public async Task<UsuarioDTO?> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var @object = await _repository.FindByIdAsync(id);
+            var objectMapped = _mapper.Map<UsuarioDTO>(@object);
+            return objectMapped;
         }
 
         public async Task<ICollection<UsuarioDTO>> ListAsync()
