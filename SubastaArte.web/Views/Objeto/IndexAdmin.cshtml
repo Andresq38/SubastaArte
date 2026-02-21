@@ -1,71 +1,142 @@
-﻿@model IEnumerable<SubastaArte.Application.DTOs.ObjetoDTO>
+﻿@*@model IEnumerable<SubastaArte.Application.DTOs.ObjetoDTO>  *@
+@model X.PagedList.IPagedList<SubastaArte.Application.DTOs.ObjetoDTO>
+@using X.PagedList
+@using X.PagedList.Mvc.Core
 
 @{
-    ViewData["Title"] = "IndexAdmin";
+    ViewData["Title"] = "Administración de Objetos para Subastar";
+    var total = Model?.Count() ?? 0;
 }
 
-<h1>IndexAdmin</h1>
+<nav class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Inicio</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Gestión de Objeros a Subastar</li>
+    </ol>
+</nav>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.IdObjeto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Descripcion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Condicion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdEstadoObjeto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaRegistro)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdVendedor)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdObjeto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Descripcion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Condicion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdEstadoObjeto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaRegistro)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdVendedor)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Objetos para Subastar</h1>
+        <p class="text-muted mb-0">Gestión administrativa del catálogo. Total: <strong>@total</strong>.</p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Nuevo Objeto
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-body d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Listado</span>
+
+        <span class="small text-muted">
+            Mostrando
+            <strong>@Model?.FirstItemOnPage</strong>–
+            <strong>@Model?.LastItemOnPage</strong>
+            de <strong>@Model?.TotalItemCount</strong>
+        </span>
+    </div>
+
+    <div class="card-body p-0">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="p-4 text-center">
+                <div class="display-6 mb-2"><i class="bi bi-inbox"></i></div>
+                <h2 class="h5">No hay libros registrados</h2>
+                <p class="text-muted mb-3">Crea el primer Objeto para iniciar el catálogo.</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Crear Objeto
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light position-sticky top-0" style="z-index:1;">
+                        <tr>
+                            <th class="ps-3" style="width:80px;">  @Html.DisplayNameFor(model => model.First().Nombre)</th>
+                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().IdVendedorNavigation)</th>
+                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().Condicion)</th>
+                            <th class="text-center" style="width:120px;">@Html.DisplayNameFor(model => model.First().Foto)</th>
+                            <th class="text-center" style="width:220px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-3">
+                                    <span class="badge text-bg-light border">@item.Nombre</span>
+                                </td>
+                                <td class="text-center"><span class="font-monospace">@item.IdVendedorNavigation.Nombre  @item.IdVendedorNavigation.Apellido1  @item.IdVendedorNavigation.Apellido2</span></td>
+                                <td class="text-center"><span class="font-monospace">@item.Condicion</span></td>
+                                <td class="text-center align-middle">
+                                    @{
+                                        var imagen = item.Foto.FirstOrDefault(i => i.IdImagen == 2);
+                                    }
+
+                                    @if (imagen != null)
+                                    {
+                                        <img style="width:125px; height:125px; object-fit:cover;"
+                                             src="data:image/jpeg;base64,@Convert.ToBase64String(imagen.Foto)"
+                                             alt="Imagen"
+                                             loading="lazy" />
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group" aria-label="Acciones">
+                                        <a asp-action="Details" asp-route-id="@item.IdObjeto" class="btn btn-outline-secondary px-3 py-2">
+                                            <i class="bi bi-eye"></i><span class="d-none d-lg-inline ms-1">Detalle</span>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.IdObjeto" class="btn btn-outline-primary px-3 py-2">
+                                            <i class="bi bi-pencil-square"></i><span class="d-none d-lg-inline ms-1">Editar</span>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.IdObjeto" class="btn btn-outline-danger px-3 py-2">
+                                            <i class="bi bi-trash"></i><span class="d-none d-lg-inline ms-1">Eliminar</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    @* Paginación *@
+    @if (Model != null && Model.PageCount > 1)
+    {
+        <div class="card-footer bg-body d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
+            <div class="small text-muted">
+                Página <strong>@Model.PageNumber</strong> de <strong>@Model.PageCount</strong>
+            </div>
+
+            <nav aria-label="Paginación de Objetos">
+                @Html.PagedListPager(
+                         Model,
+                         page => Url.Action("IndexAdmin", new { page }),
+                         new PagedListRenderOptions
+            {
+                UlElementClasses = new[] { "pagination", "mb-0" },
+                LiElementClasses = new[] { "page-item" },
+                PageClasses = new[] { "page-link" },
+
+                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                DisplayLinkToNextPage = PagedListDisplayMode.Always,
+
+                MaximumPageNumbersToDisplay = 5
+            }
+                         )
+            </nav>
+        </div>
+    }
+</div>

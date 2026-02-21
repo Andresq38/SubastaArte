@@ -1,87 +1,132 @@
 ﻿@model IEnumerable<SubastaArte.Application.DTOs.ObjetoDTO>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Catálogo de Objetos";
+    var total = Model?.Count() ?? 0;
 }
 
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Catálogo de Objetos</h1>
+        <p class="text-muted mb-0">Explora el catálogo de Objetos disponibles. Total: <strong>@total</strong>.</p>
+    </div>
 
+</div>
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.IdObjeto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdCategoria)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Condicion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdEstadoObjetoNavigation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdVendedorNavigation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Foto)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdObjeto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @string.Join(", ", item.IdCategoria.Select(c => c.Nombre))
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Condicion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdEstadoObjetoNavigation.Nombre)
-            </td>
-            <td>
-                    @(item.IdVendedorNavigation.Nombre + " " +
-                        item.IdVendedorNavigation.Apellido1 + " " +
-                        item.IdVendedorNavigation.Apellido2)
-            </td>
-
-                <td>
-                    @{
-                        var imagen = item.Foto.FirstOrDefault(i => i.IdImagen == 2);
-                    }
-
-                    @if (imagen != null)
-                    {
-                        <img style="width:125px; height:125px; object-fit:cover;"
-                             src="data:image/jpeg;base64,@Convert.ToBase64String(imagen.Foto)"
-                             alt="Imagen"
-                             loading="lazy" />
-                    }
-                </td>
-
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info d-flex align-items-center" role="alert">
+        <i class="bi bi-info-circle me-2"></i>
+        <div>No hay Objetos disponibles en este momento.</div>
+    </div>
 }
-    </tbody>
-</table>
+else
+{
+    <section aria-label="Listado de libros">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <article class="card h-100 shadow-sm border-0">
+                        <!-- Imagen -->
+                        <div class="rounded-top overflow-hidden bg-body-tertiary" style="height: 360px;">
+                            @* Si hay imagen, la mostramos; si no, placeholder *@
+                            @{
+                                var imagen = item.Foto.FirstOrDefault(i => i.IdImagen == 2);
+                            }
+                            @if (item.Foto != null)
+                            {
+                                <img class="w-100 h-100 object-fit-cover  rounded-top"
+                                     src="data:image/jpeg;base64,@Convert.ToBase64String(imagen.Foto)"
+                                     alt="Portada del libro @item.Nombre"
+                                     loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="d-flex flex-column justify-content-center align-items-center text-muted">
+                                    <i class="bi bi-image fs-1"></i>
+                                    <span class="small">Sin imagen</span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Contenido -->
+                        <div class="card-body">
+                            <h2 class="h6 fw-semibold mb-1 text-truncate" title="@item.Nombre">
+                                @item.Nombre
+                            </h2>
+
+                            <div class="text-muted small mb-2">
+                                <span class="me-2">
+                                    <i class="bi bi-person me-1"></i>
+                                    Vendedor: <span class="font-monospace">@item.IdVendedorNavigation.Nombre @item.IdVendedorNavigation.Apellido1 @item.IdVendedorNavigation.Apellido2</span>
+                                </span>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                                <span class="badge text-bg-light border">
+                                    <i class="bi bi-award me-1"></i>
+                                    @(item.Condicion)
+                                </span>
+
+                                <span class="badge text-bg-success">
+                                    <i class="bi bi-check-lg me-1"></i>
+                                    @item.IdEstadoObjetoNavigation.Nombre
+                                </span>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                                <span>
+                                    @if (item.IdCategoria != null && item.IdCategoria.Any())
+                                    {
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @foreach (var c in item.IdCategoria)
+                                            {
+                                                <span class="badge text-bg-light border">
+                                                    <i class="bi bi-tag me-1"></i>@c.Nombre
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Sin categorías asociadas.</span>
+                                    }
+                                </span>
+
+                            </div>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="card-footer bg-body border-0 pt-0 pb-3">
+                            <div class="d-grid gap-2 px-2">
+                                <a asp-controller="Objeto"
+                                   asp-action="Details"
+                                   asp-route-id="@item.IdObjeto"
+                                   class="btn btn-primary">
+                                    <i class="bi bi-eye me-1"></i> Ver detalle
+                                </a>
+
+
+                                @*<button type="button" class="btn btn-outline-secondary">
+                                    <i class="bi bi-bag-plus me-1"></i> Agregar
+                                </button>*@
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            }
+
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <style>
+        .card:hover {
+            transform: translateY(-3px);
+            transition: transform .18s ease;
+        }
+    </style>
+}

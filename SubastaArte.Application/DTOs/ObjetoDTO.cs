@@ -35,7 +35,7 @@ namespace SubastaArte.Application.DTOs
         [DisplayName("Estado Objeto")]
         public EstadoObjetoDTO IdEstadoObjetoNavigation { get; set; } = new();
 
-        [DisplayName("Dueño Objeto")]
+        [DisplayName("Nombre Vendedor")]
         public UsuarioDTO IdVendedorNavigation { get; set; } = new();
 
         [DisplayName("Imagen")]
