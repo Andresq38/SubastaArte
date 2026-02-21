@@ -125,10 +125,6 @@ public partial class SubastasContext : DbContext
         {
             entity.HasKey(e => e.IdImagen);
 
-            entity.Property(e => e.RutaImagen)
-                .HasMaxLength(255)
-                .IsUnicode(false);
-
             entity.HasOne(d => d.IdObjetoNavigation).WithMany(p => p.Imagen)
                 .HasForeignKey(d => d.IdObjeto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -250,6 +246,10 @@ public partial class SubastasContext : DbContext
             entity.Property(e => e.IncrementoMinimo).HasColumnType("numeric(18, 2)");
             entity.Property(e => e.PrecioBase).HasColumnType("numeric(18, 2)");
 
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(150)
+                .IsUnicode(false);
+
             entity.HasOne(d => d.IdCreadorNavigation).WithMany(p => p.SubastaIdCreadorNavigation)
                 .HasForeignKey(d => d.IdCreador)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -269,6 +269,8 @@ public partial class SubastasContext : DbContext
                 .HasForeignKey(d => d.IdVendedor)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Subasta_Vendedor");
+
+
         });
 
         modelBuilder.Entity<Usuario>(entity =>

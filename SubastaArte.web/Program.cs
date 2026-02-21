@@ -85,6 +85,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IRepositoryUsuario, RepositoryUsuario>();
 builder.Services.AddTransient<IRepositoryRol, RepositoryRol>();
 builder.Services.AddTransient<IRepositoryEstadoUsuario, RepositoryEstadoUsuario>();
+builder.Services.AddTransient<IRepositoryObjeto, RepositoryObjeto>();
+builder.Services.AddTransient<IRepositoryCategoria, RepositoryCategoria>();
+builder.Services.AddTransient<IRepositoryEstadoObjeto, RepositoryEstadoObjeto>();
+builder.Services.AddTransient<IRepositoryImagen, RepositoryImagen>();
 
 
 
@@ -92,6 +96,10 @@ builder.Services.AddTransient<IRepositoryEstadoUsuario, RepositoryEstadoUsuario>
 builder.Services.AddTransient<IServiceUsuario, ServiceUsuario>();
 builder.Services.AddTransient<IServiceEstadoUsuario, ServiceEstadoUsuario>();
 builder.Services.AddTransient<IServiceRol, ServiceRol>();
+builder.Services.AddTransient<IServiceObjeto, ServiceObjeto>();
+builder.Services.AddTransient<IServiceCategoria, ServiceCategoria>();
+builder.Services.AddTransient<IServiceEstadoObjeto, ServiceEstadoObjeto>();
+builder.Services.AddTransient<IServiceImagen, ServiceImagen>();
 
 
 // =======================
@@ -104,6 +112,10 @@ builder.Services.AddAutoMapper(config =>
     config.AddProfile<UsuarioProfile>();
     config.AddProfile<RolProfile>();
     config.AddProfile<EstadoUsuarioProfile>();
+    config.AddProfile<ObjetoProfile>();
+    config.AddProfile<CategoriaProfile>();
+    config.AddProfile<EstadoObjetoProfile>();
+    config.AddProfile<ImagenProfile>();
 });
 
 // =======================

@@ -9,7 +9,7 @@ public partial class Imagen
 
     public int IdObjeto { get; set; }
 
-    public string RutaImagen { get; set; } = null!;
+    public byte[] Foto { get; set; } = null!;
 
     public virtual Objeto IdObjetoNavigation { get; set; } = null!;
 }

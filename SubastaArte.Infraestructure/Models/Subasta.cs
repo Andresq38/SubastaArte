@@ -17,6 +17,8 @@ public partial class Subasta
 
     public decimal IncrementoMinimo { get; set; }
 
+    public string Nombre { get; set; } = null!;
+
     public int IdEstadoSubasta { get; set; }
 
     public int IdCreador { get; set; }
