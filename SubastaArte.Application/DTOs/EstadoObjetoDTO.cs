@@ -10,7 +10,7 @@ namespace SubastaArte.Application.DTOs
 {
     public record EstadoObjetoDTO
     {
-        public int IdEstadoUsuario { get; set; }
+        public int IdEstadoObjeto { get; set; }
 
         [DisplayName("Estado Objeto")]
         public string Nombre { get; set; } = string.Empty;

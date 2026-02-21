@@ -1,0 +1,87 @@
+﻿@model IEnumerable<SubastaArte.Application.DTOs.ObjetoDTO>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.IdObjeto)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdCategoria)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Condicion)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdEstadoObjetoNavigation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdVendedorNavigation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Foto)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.IdObjeto)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nombre)
+            </td>
+            <td>
+                @string.Join(", ", item.IdCategoria.Select(c => c.Nombre))
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Condicion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IdEstadoObjetoNavigation.Nombre)
+            </td>
+            <td>
+                    @(item.IdVendedorNavigation.Nombre + " " +
+                        item.IdVendedorNavigation.Apellido1 + " " +
+                        item.IdVendedorNavigation.Apellido2)
+            </td>
+
+                <td>
+                    @{
+                        var imagen = item.Foto.FirstOrDefault(i => i.IdImagen == 2);
+                    }
+
+                    @if (imagen != null)
+                    {
+                        <img style="width:125px; height:125px; object-fit:cover;"
+                             src="data:image/jpeg;base64,@Convert.ToBase64String(imagen.Foto)"
+                             alt="Imagen"
+                             loading="lazy" />
+                    }
+                </td>
+
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -33,18 +33,19 @@ namespace SubastaArte.Application.DTOs
         public int IdVendedor { get; set; }
 
         [DisplayName("Estado Objeto")]
-        public EstadoObjeto IdEstadoObjetoNavigation { get; set; } = new();
+        public EstadoObjetoDTO IdEstadoObjetoNavigation { get; set; } = new();
 
-        [DisplayName("Estado Objeto")]
-        public Usuario IdVendedorNavigation { get; set; } = new();
+        [DisplayName("Dueño Objeto")]
+        public UsuarioDTO IdVendedorNavigation { get; set; } = new();
 
-        public List<ImagenDTO> Imagen { get; set; } = new();
+        [DisplayName("Imagen")]
+        public List<ImagenDTO> Foto { get; set; } = new();
 
         [Display(Name = "Categoría")]
         public List<CategoriaDTO> IdCategoria { get; set; } = new();
 
-        [Display(Name = "Subasta")]
-        public List<SubastaDTO> Subasta { get; set; } = new();
+        //[Display(Name = "Subasta")]
+        //public List<SubastaDTO> Subasta { get; set; } = new();
 
 
 

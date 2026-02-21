@@ -23,7 +23,7 @@ public partial class Objeto
 
     public virtual Usuario IdVendedorNavigation { get; set; } = null!;
 
-    public virtual ICollection<Imagen> Imagen { get; set; } = new List<Imagen>();
+    public virtual ICollection<Imagen> Foto { get; set; } = new List<Imagen>();
 
     public virtual ICollection<Subasta> Subasta { get; set; } = new List<Subasta>();
 

@@ -15,7 +15,7 @@ namespace SubastaArte.Application.DTOs
 
 
         [Display(Name = "Imagen")]
-        public byte[] Imagen { get; set; } = Array.Empty<byte>();
+        public byte[] Foto { get; set; } = Array.Empty<byte>();
 
         public ObjetoDTO IdObjetoNavigation { get; set; } = new();
     }

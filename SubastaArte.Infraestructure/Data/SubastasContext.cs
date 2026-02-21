@@ -125,7 +125,7 @@ public partial class SubastasContext : DbContext
         {
             entity.HasKey(e => e.IdImagen);
 
-            entity.HasOne(d => d.IdObjetoNavigation).WithMany(p => p.Imagen)
+            entity.HasOne(d => d.IdObjetoNavigation).WithMany(p => p.Foto)
                 .HasForeignKey(d => d.IdObjeto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Imagen_Objeto");
