@@ -1,0 +1,165 @@
+﻿@model SubastaArte.Application.DTOs.ObjetoDTO
+
+@{
+    ViewData["Title"] = "Detalle del Objeto";
+}
+
+<nav class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Inicio</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Objeto" asp-action="Index" class="text-decoration-none">Catálogo</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Detalle</li>
+    </ol>
+</nav>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Detalle del libro</h1>
+        <p class="text-muted mb-0">Información completa del objeto seleccionado.</p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a asp-controller="Libro" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Volver al catálogo
+        </a>
+    </div>
+</div>
+
+<article class="card shadow-sm border-0 overflow-hidden">
+    <div class="row g-0">
+
+        <!-- Imagen / portada -->
+        <div class="col-12 col-lg-5 bg-body-tertiary p-3">
+            @if (Model.Foto != null && Model.Foto.Any())
+            {
+                <div id="carouselObjeto" class="carousel slide carousel-dark" data-bs-ride="carousel">
+                    <div class="carousel-inner text-center">
+
+                        @{
+                            var primera = true;
+                        }
+
+                        @foreach (var img in Model.Foto)
+                        {
+                            @* Una forma de ver imagenes *@
+                           @*  <div class="carousel-item @(primera ? "active" : "")">
+                                <img class="w-100 rounded"
+                                     style="max-height:500px; object-fit:cover;"
+                                     src="data:image/jpeg;base64,@Convert.ToBase64String(img.Foto)"
+                                     alt="Imagen de @Model.Nombre"
+                                     loading="lazy" />
+                            </div> *@
+
+                            @* Una forma de ver imagenes *@
+                            <div class="carousel-item @(primera ? "active" : "") text-center">
+
+                                <img class="img-fluid rounded"
+                                     style="max-height:500px; object-fit:contain; background-color:#f8f9fa;"
+                                     src="data:image/jpeg;base64,@Convert.ToBase64String(img.Foto)"
+                                     alt="Imagen de @Model.Nombre"
+                                     loading="lazy" />
+
+                            </div>
+
+                            primera = false;
+                        }
+                    </div>
+
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselObjeto" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselObjeto" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                </div>
+            }
+        </div>
+
+        <!-- Contenido -->
+        <div class="col-12 col-lg-7">
+            <div class="card-body p-4">
+
+                <header class="mb-3">
+                    <h2 class="h4 fw-semibold mb-1">@Model.Nombre</h2>
+
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+
+                        @* <span class="badge text-bg-light">
+                            <i class="bi bi-award me-1"></i>
+                           @Model.Condicion
+                        </span> *@
+
+                        <span class="badge text-bg-success">
+                            <i class="bi bi-check-lg me-1"></i>
+                            @Model.IdEstadoObjetoNavigation.Nombre
+                        </span>
+                        
+                    </div>
+                </header>
+
+                <hr class="my-3" />
+
+                <!-- Datos clave -->
+                <dl class="row mb-0">
+                    <dt class="col-12 col-md-4 text-muted">Desripcion Objeto</dt>
+                    <dd class="col-12 col-md-8">
+                        @Model.Descripcion
+                    </dd>
+
+                    <dt class="col-12 col-md-4 text-muted">Vendedor</dt>
+                    <dd class="col-12 col-md-8">
+                        @Model.IdVendedorNavigation.Nombre @Model.IdVendedorNavigation.Apellido1 @Model.IdVendedorNavigation.Apellido2
+                    </dd>
+
+                    <dt class="col-12 col-md-4 text-muted">Condicion Objeto</dt>
+                    <dd class="col-12 col-md-8">
+                        @Model.Condicion
+                    </dd>
+
+                    <dt class="col-12 col-md-4 text-muted">Fecha Registro</dt>
+                    <dd class="col-12 col-md-8">
+                        @(Model.FechaRegistro)
+                    </dd>
+
+                    <dt class="col-12 col-md-4 text-muted">Categorías</dt>
+                    <dd class="col-12 col-md-8">
+                        @if (Model.IdCategoria != null && Model.IdCategoria.Any())
+                        {
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var c in Model.IdCategoria)
+                                {
+                                    <span class="badge text-bg-light border">
+                                        <i class="bi bi-tag me-1"></i>@c.Nombre
+                                    </span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Sin categorías asociadas.</span>
+                        }
+                    </dd>
+                </dl>
+
+                <hr class="my-4" />
+
+                <!-- Acciones -->
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-end">
+                    <a asp-controller="Objeto" asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Regresar al listado
+                    </a>
+
+                    @*<button class="btn btn-primary" type="button">
+                        <i class="bi bi-bag-plus me-1"></i> Agregar al carrito
+                    </button>*@
+                </div>
+
+            </div>
+        </div>
+    </div>
+</article>
