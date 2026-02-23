@@ -44,8 +44,8 @@ namespace SubastaArte.Application.DTOs
         [Display(Name = "Categoría")]
         public List<CategoriaDTO> IdCategoria { get; set; } = new();
 
-        //[Display(Name = "Subasta")]
-        //public List<SubastaDTO> Subasta { get; set; } = new();
+        [Display(Name = "Subasta")]
+        public List<SubastaDTO> Subasta { get; set; } = new();
 
 
 

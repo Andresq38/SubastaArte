@@ -89,6 +89,13 @@ builder.Services.AddTransient<IRepositoryObjeto, RepositoryObjeto>();
 builder.Services.AddTransient<IRepositoryCategoria, RepositoryCategoria>();
 builder.Services.AddTransient<IRepositoryEstadoObjeto, RepositoryEstadoObjeto>();
 builder.Services.AddTransient<IRepositoryImagen, RepositoryImagen>();
+builder.Services.AddTransient<IRepositorySubasta, RepositorySubasta>();
+builder.Services.AddTransient<IRepositoryEstadoSubasta, RepositoryEstadoSubasta>();
+builder.Services.AddTransient<IRepositoryHistorialUsuario, RepositoryHistorialUsuario>();
+builder.Services.AddTransient<IRepositoryPago, RepositoryPago>();
+builder.Services.AddTransient<IRepositoryPuja, RepositoryPuja>();
+builder.Services.AddTransient<IRepositoryResultadoSubasta, RepositoryResultadoSubasta>();
+builder.Services.AddTransient<IRepositoryCancelacionSubasta, RepositoryCancelacionSubasta>();
 
 
 
@@ -100,6 +107,14 @@ builder.Services.AddTransient<IServiceObjeto, ServiceObjeto>();
 builder.Services.AddTransient<IServiceCategoria, ServiceCategoria>();
 builder.Services.AddTransient<IServiceEstadoObjeto, ServiceEstadoObjeto>();
 builder.Services.AddTransient<IServiceImagen, ServiceImagen>();
+builder.Services.AddTransient<IServiceSubasta, ServiceSubasta>();
+builder.Services.AddTransient<IServiceEstadoSubasta, ServiceEstadoSubasta>();
+builder.Services.AddTransient<IServiceHistorialUsuario, ServiceHistorialUsuario>();
+builder.Services.AddTransient<IServicePago, ServicePago>();
+builder.Services.AddTransient<IServicePuja, ServicePuja>();
+builder.Services.AddTransient<IServiceResultadoSubasta, ServiceResultadoSubasta>();
+builder.Services.AddTransient<IServiceCancelacionSubasta, ServiceCancelacionSubasta>();
+
 
 
 // =======================
@@ -116,6 +131,13 @@ builder.Services.AddAutoMapper(config =>
     config.AddProfile<CategoriaProfile>();
     config.AddProfile<EstadoObjetoProfile>();
     config.AddProfile<ImagenProfile>();
+    config.AddProfile<SubastaProfile>();
+    config.AddProfile<EstadoSubastaProfile>();
+    config.AddProfile<HistorialUsuarioProfile>();
+    config.AddProfile<PagoProfile>();
+    config.AddProfile<PujaProfile>();
+    config.AddProfile<ResultadoSubastaProfile>();
+    config.AddProfile<CancelacionSubastaProfile>();
 });
 
 // =======================
