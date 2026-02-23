@@ -15,6 +15,7 @@ namespace SubastaArte.Application.Profiles
         {
             
             CreateMap<ObjetoDTO, Objeto>().ReverseMap();
+            
             CreateMap<ObjetoDTO, Objeto>()
             .ForMember(dest => dest.IdVendedorNavigation, orig => orig.Ignore())
             .ForMember(dest => dest.IdEstadoObjetoNavigation, orig => orig.Ignore())

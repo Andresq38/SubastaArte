@@ -75,8 +75,42 @@ namespace SubastaArte.web.Controllers
                 throw new Exception(ex.Message);
             }
 
+        }
 
+        public async Task<ActionResult> DetailsSf(int? id)
+        {
+            try
+            {
+                if (id == null)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                       "Subasta No encontrada",
+                       $"No existe una subasta sin ID",
+                       SweetAlertMessageType.error
+                   );
+                    return RedirectToAction("Index");
+                }
+                var @object = await _serviceSubasta.FindByIdAsync(id.Value);
+                if (@object == null)
+                {
+                    throw new Exception("Subasta no existente");
+
+                }
+                ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
+                   "Detalle de la Subasta",
+                   $"Mostrando información de la Subasta: {@object.Nombre}",
+                   SweetAlertMessageType.info
+               );
+                return View(@object);
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
 
         }
+
+
     }
 }
