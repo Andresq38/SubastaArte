@@ -28,18 +28,25 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
         {
             var @object = await _context.Set<Subasta>().
                                         Where(l => l.IdSubasta == id)
-                                        //.Include(x => x.IdEstadoUsuarioNavigation)
-                                        //.Include(x => x.IdRolNavigation)
+                                        .Include(x => x.IdObjetoNavigation)
+                                            .ThenInclude(y => y.Foto)
+                                        .Include(x => x.IdCreadorNavigation)
+                                        .Include(x => x.IdEstadoSubastaNavigation)
+                                        .Include(x => x.IdVendedorNavigation)
                                         .FirstOrDefaultAsync();
             return @object!;
         }
 
-        public async Task<ICollection<Subasta>> ListAsync()
+        public async Task<ICollection<Subasta>> ListAsync(int estadoId)
         {
             //Select * from Subasta
             var collection = await _context.Set<Subasta>()
-                //.Include(x => x.IdEstadoUsuarioNavigation)
-                //.Include(x => x.IdRolNavigation)
+                .Where(x => x.IdEstadoSubasta == estadoId)
+                .Include(x => x.IdObjetoNavigation)
+                .ThenInclude(y => y.Foto)
+                .Include(x => x.IdCreadorNavigation)
+                .Include(x => x.IdEstadoSubastaNavigation)
+                .Include(x => x.IdVendedorNavigation)
                 .AsNoTracking()
                 .ToListAsync();
             return collection;

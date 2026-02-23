@@ -10,7 +10,7 @@ namespace SubastaArte.Application.Services.Interfaces
 {
     public interface IServiceSubasta
     {
-        Task<ICollection<SubastaDTO>> ListAsync();
+        Task<ICollection<SubastaDTO>> ListAsync(int estadoId);
         Task<SubastaDTO> FindByIdAsync(int id);
         Task DeleteAsync(int id);
     }

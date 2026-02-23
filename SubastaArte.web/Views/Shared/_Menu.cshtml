@@ -1,7 +1,7 @@
 ﻿<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
     <div class="container">
         <a class="navbar-brand fw-semibold">
-            <i class="bi bi-book me-2"></i>Subasta Arte
+            <i class="bi bi-palette me-2"></i>Subasta Arte
         </a>
 
         <button class="navbar-toggler" type="button"
@@ -15,7 +15,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" asp-controller="Objeto" asp-action="Index">
-                        <i class="bi bi-collection me-1"></i>Catálogo
+                        <i class="bi bi-shop me-1"></i>Catálogo
                     </a>
                 </li>
 
@@ -33,11 +33,19 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-gear-fill me-1"></i>Proceso
+                        <i class="bi bi-cash-coin me-1"></i>Subastas
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item">Órdenes</a></li>
+                        <li><a class="dropdown-item" asp-controller="Subasta" asp-action="IndexSA">Subastas Activas</a></li>
+                        <li><a class="dropdown-item" asp-controller="Subasta" asp-action="IndexSF">Subasta Finalizadas</a></li>
                     </ul>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-fill me-1"></i>Proceso
+                    </a>
                 </li>
 
                 <li class="nav-item dropdown">

@@ -9,7 +9,7 @@ namespace SubastaArte.Infraestructure.Repository.Interfaces
 {
     public interface IRepositorySubasta
     {
-        Task<ICollection<Subasta>> ListAsync();
+        Task<ICollection<Subasta>> ListAsync(int estadoId);
         Task<Subasta> FindByIdAsync(int id);
         Task DeleteAsync(int id);
 

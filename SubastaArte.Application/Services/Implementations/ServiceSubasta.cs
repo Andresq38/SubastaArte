@@ -34,9 +34,9 @@ namespace SubastaArte.Application.Services.Implementations
             return objectMapped;
         }
 
-        public async Task<ICollection<SubastaDTO>> ListAsync()
+        public async Task<ICollection<SubastaDTO>> ListAsync(int estadoId)
         {
-            var list = await _repository.ListAsync();
+            var list = await _repository.ListAsync(estadoId);
             var collection = _mapper.Map<ICollection<SubastaDTO>>(list);
             return collection;
         }

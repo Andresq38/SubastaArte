@@ -1,10 +1,10 @@
-﻿@*@model IEnumerable<SubastaArte.Application.DTOs.ObjetoDTO>  *@
-@model X.PagedList.IPagedList<SubastaArte.Application.DTOs.ObjetoDTO>
+﻿@*@model IEnumerable<SubastaArte.Application.DTOs.SubastaDTO>  *@
+@model X.PagedList.IPagedList<SubastaArte.Application.DTOs.SubastaDTO>
 @using X.PagedList
 @using X.PagedList.Mvc.Core
 
 @{
-    ViewData["Title"] = "Administración de Objetos para Subastar";
+    ViewData["Title"] = "Administración de Subastas Activas";
     var total = Model?.Count() ?? 0;
 }
 
@@ -13,19 +13,19 @@
         <li class="breadcrumb-item">
             <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Inicio</a>
         </li>
-        <li class="breadcrumb-item active" aria-current="page">Gestión de Objetos a Subastar</li>
+        <li class="breadcrumb-item active" aria-current="page">Gestión de Subastas Activas</li>
     </ol>
 </nav>
 
 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
     <div>
         <h1 class="h3 mb-1">Objetos para Subastar</h1>
-        <p class="text-muted mb-0">Gestión administrativa del catálogo. Total: <strong>@total</strong>.</p>
+        <p class="text-muted mb-0">Gestión administrativa de subastas activas. Total: <strong>@total</strong>.</p>
     </div>
 
     <div class="d-flex flex-wrap gap-2">
         <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i> Nuevo Objeto
+            <i class="bi bi-plus-lg me-1"></i> Nueva Subasta
         </a>
     </div>
 </div>
@@ -48,7 +48,7 @@
             <div class="p-4 text-center">
                 <div class="display-6 mb-2"><i class="bi bi-inbox"></i></div>
                 <h2 class="h5">No hay libros registrados</h2>
-                <p class="text-muted mb-3">Crea el primer Objeto para iniciar el catálogo.</p>
+                <p class="text-muted mb-3">Crea la primera Subasta para iniciar.</p>
                 <a asp-action="Create" class="btn btn-primary">
                     <i class="bi bi-plus-lg me-1"></i> Crear Objeto
                 </a>
@@ -61,9 +61,10 @@
                     <thead class="table-light position-sticky top-0" style="z-index:1;">
                         <tr>
                             <th class="ps-3" style="width:80px;">  @Html.DisplayNameFor(model => model.First().Nombre)</th>
-                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().IdVendedorNavigation)</th>
-                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().Condicion)</th>
-                            <th class="text-center" style="width:120px;">@Html.DisplayNameFor(model => model.First().Foto)</th>
+                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().FechaInicio)</th>
+                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().FechaCierre)</th>
+                            <th class="text-center" style="width:120px;">@Html.DisplayNameFor(model => model.First().IdObjetoNavigation.Foto)</th>
+                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().Puja)</th>
                             <th class="text-center" style="width:220px;">Acciones</th>
                         </tr>
                     </thead>
@@ -74,11 +75,11 @@
                                 <td class="ps-3">
                                     <span class="badge text-bg-light border">@item.Nombre</span>
                                 </td>
-                                <td class="text-center"><span class="font-monospace">@item.IdVendedorNavigation.Nombre  @item.IdVendedorNavigation.Apellido1  @item.IdVendedorNavigation.Apellido2</span></td>
-                                <td class="text-center"><span class="font-monospace">@item.Condicion</span></td>
+                                <td class="text-center"><span class="font-monospace">@item.FechaInicio</span></td>
+                                <td class="text-center"><span class="font-monospace">@item.FechaCierre</span></td>
                                 <td class="text-center align-middle">
                                     @{
-                                        var imagen = item.Foto.FirstOrDefault();
+                                        var imagen = item.IdObjetoNavigation.Foto.FirstOrDefault();
                                     }
 
                                     @if (imagen != null)
@@ -89,15 +90,16 @@
                                              loading="lazy" />
                                     }
                                 </td>
+                                <td class="text-center"><span class="font-monospace">1</span></td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group" aria-label="Acciones">
-                                        <a asp-action="Details" asp-route-id="@item.IdObjeto" class="btn btn-outline-secondary px-3 py-2">
+                                        <a asp-action="Details" asp-route-id="@item.IdSubasta" class="btn btn-outline-secondary px-3 py-2">
                                             <i class="bi bi-eye"></i><span class="d-none d-lg-inline ms-1">Detalle</span>
                                         </a>
-                                        <a asp-action="Edit" asp-route-id="@item.IdObjeto" class="btn btn-outline-primary px-3 py-2">
+                                        <a asp-action="Edit" asp-route-id="@item.IdSubasta" class="btn btn-outline-primary px-3 py-2">
                                             <i class="bi bi-pencil-square"></i><span class="d-none d-lg-inline ms-1">Editar</span>
                                         </a>
-                                        <a asp-action="Delete" asp-route-id="@item.IdObjeto" class="btn btn-outline-danger px-3 py-2">
+                                        <a asp-action="Delete" asp-route-id="@item.IdSubasta" class="btn btn-outline-danger px-3 py-2">
                                             <i class="bi bi-trash"></i><span class="d-none d-lg-inline ms-1">Eliminar</span>
                                         </a>
                                     </div>
@@ -118,10 +120,10 @@
                 Página <strong>@Model.PageNumber</strong> de <strong>@Model.PageCount</strong>
             </div>
 
-            <nav aria-label="Paginación de Objetos">
+            <nav aria-label="Paginación de Subastas Activas">
                 @Html.PagedListPager(
                          Model,
-                         page => Url.Action("IndexAdmin", new { page }),
+                         page => Url.Action("IndexSA", new { page }),
                          new PagedListRenderOptions
             {
                 UlElementClasses = new[] { "pagination", "mb-0" },
