@@ -33,9 +33,9 @@ else
                         <div class="rounded-top overflow-hidden bg-body-tertiary" style="height: 360px;">
                             @* Si hay imagen, la mostramos; si no, placeholder *@
                             @{
-                                var imagen = item.Foto.FirstOrDefault(i => i.IdImagen == 2);
+                                var imagen = item.Foto?.FirstOrDefault();
                             }
-                            @if (item.Foto != null)
+                            @if (imagen != null)
                             {
                                 <img class="w-100 h-100 object-fit-cover  rounded-top"
                                      src="data:image/jpeg;base64,@Convert.ToBase64String(imagen.Foto)"

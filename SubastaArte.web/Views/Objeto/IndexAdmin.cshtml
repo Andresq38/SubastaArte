@@ -78,7 +78,7 @@
                                 <td class="text-center"><span class="font-monospace">@item.Condicion</span></td>
                                 <td class="text-center align-middle">
                                     @{
-                                        var imagen = item.Foto.FirstOrDefault(i => i.IdImagen == 2);
+                                        var imagen = item.Foto.FirstOrDefault();
                                     }
 
                                     @if (imagen != null)
