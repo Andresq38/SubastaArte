@@ -25,6 +25,8 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                                         Where(l => l.IdUsuario == id)
                                         .Include(x => x.IdEstadoUsuarioNavigation)
                                         .Include(x => x.IdRolNavigation)
+                                        .Include(x => x.SubastaIdVendedorNavigation)
+                                        .Include(x => x.Puja)
                                         .FirstOrDefaultAsync();
             return @object!;
         }
@@ -35,6 +37,8 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
             var collection = await _context.Set<Usuario>()
                 .Include(x => x.IdEstadoUsuarioNavigation)
                 .Include(x => x.IdRolNavigation)
+                .Include(x => x.SubastaIdVendedorNavigation)
+                .Include(x => x.Puja)
                 .AsNoTracking()
                 .ToListAsync();
             return collection;

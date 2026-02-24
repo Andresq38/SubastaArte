@@ -34,7 +34,6 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                                             .ThenInclude(y => y.IdCategoria)
                                         .Include(x => x.IdCreadorNavigation)
                                         .Include(x => x.IdEstadoSubastaNavigation)
-                                            .ThenInclude(y => y.Nombre)
                                         .Include(x => x.IdVendedorNavigation)
                                         .FirstOrDefaultAsync();
             return @object!;
