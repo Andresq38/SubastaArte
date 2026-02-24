@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using X.PagedList.Extensions;
+using SubastaArte.Infraestructure.Models;
 
 
 namespace SubastaArte.web.Controllers
@@ -36,6 +37,21 @@ namespace SubastaArte.web.Controllers
 
             //Cantidad de elementos por página
             return View(collection.ToPagedList(pageNumber, pageSize));
+        }
+
+        public async Task<ActionResult> SubastasObjetos(int IdObjeto, int? page)
+        {
+            var objeto = await _serviceObjeto.FindByIdAsync(IdObjeto);
+            if (objeto == null)
+            {
+                return NotFound();
+            }
+
+            var subastas = objeto.Subasta ?? new List<SubastaDTO>();
+            int pageNumber = page ?? 1;
+            int pageSize = 5;
+
+            return View(subastas.ToPagedList(pageNumber, pageSize));
         }
 
         public async Task<ActionResult> Details(int? id)
