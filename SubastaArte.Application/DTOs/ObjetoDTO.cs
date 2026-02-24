@@ -38,7 +38,7 @@ namespace SubastaArte.Application.DTOs
         [DisplayName("Nombre Vendedor")]
         public UsuarioDTO IdVendedorNavigation { get; set; } = new();
 
-        [DisplayName("Imagen")]
+        [Display(Name = "Imagen")]
         public List<ImagenDTO> Foto { get; set; } = new();
 
         [Display(Name = "Categoría")]

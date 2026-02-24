@@ -36,6 +36,7 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                                         .Include(x => x.IdVendedorNavigation)
                                         .Include(x => x.IdCategoria)
                                         .Include(x => x.IdEstadoObjetoNavigation)
+                                            .ThenInclude(y => y.Nombre)
                                         .Include(x => x.Foto)
                                         .FirstOrDefaultAsync();
             return @object!;
@@ -58,6 +59,7 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                                        .OrderBy(x => x.IdVendedor)
                                        .Include(x => x.IdCategoria)
                                        .Include(x => x.IdEstadoObjetoNavigation)
+                                            .ThenInclude(y => y.Nombre)
                                        .Include(x => x.Foto)
                                        .AsNoTracking()
                                        .ToListAsync();

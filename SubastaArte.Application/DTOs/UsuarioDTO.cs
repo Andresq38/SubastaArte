@@ -34,5 +34,8 @@ namespace SubastaArte.Application.DTOs
 
         public EstadoUsuarioDTO IdEstadoUsuarioNavigation { get; set; } = new();
 
+        public int CantidadSubastas { get; set; }
+        public int CantidadPujas { get; set; }
+
     }
 }

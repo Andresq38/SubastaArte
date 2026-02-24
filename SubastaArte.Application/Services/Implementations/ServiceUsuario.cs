@@ -25,6 +25,9 @@ namespace SubastaArte.Application.Services.Implementations
         {
             var @object = await _repository.FindByIdAsync(id);
             var objectMapped = _mapper.Map<UsuarioDTO>(@object);
+            
+            //Arma objeto para asignar valores
+            
             return objectMapped;
         }
 
