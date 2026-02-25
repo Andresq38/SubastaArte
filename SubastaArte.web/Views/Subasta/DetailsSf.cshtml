@@ -90,12 +90,18 @@
                     <div>
                         <!-- Condición -->
                         <span class="badge text-bg-light mb-2">
+                            <i>Condicion:</i>
+                        </span>
+                        <span class="badge text-bg-light mb-2">
                             <i class="bi bi-award me-1"></i>
                             @Model.IdObjetoNavigation.Condicion
                         </span>
 
                         <!-- Categorías -->
                         <div class="d-flex flex-wrap gap-2 mt-1">
+                            <span class="badge text-bg-light">
+                                <i>Categorias:</i>
+                            </span>
                             @if (Model.IdObjetoNavigation.IdCategoria != null
                             && Model.IdObjetoNavigation.IdCategoria.Any())
                             {
