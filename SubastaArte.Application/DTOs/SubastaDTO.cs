@@ -45,12 +45,12 @@ namespace SubastaArte.Application.DTOs
 
         public List<PagoDTO> Pago { get; set; } = new();
 
-        [DisplayName("Cantidad Pujas")]
-        public List<PujaDTO> Puja { get; set; } = new();
+        //[DisplayName("Cantidad Pujas")]
+        //public List<PujaDTO> Puja { get; set; } = new();
 
         public List<ResultadoSubastaDTO> ResultadoSubasta { get; set; } = new();
 
-
+        public int PujasSubasta { get; set; }
 
 
     }

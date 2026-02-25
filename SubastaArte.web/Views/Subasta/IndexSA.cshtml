@@ -64,7 +64,7 @@
                             <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().FechaInicio)</th>
                             <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().FechaCierre)</th>
                             <th class="text-center" style="width:120px;">Imagen</th>
-                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().Puja)</th>
+                            <th class="text-center" style="width:170px;">  Cantidad de Pujas</th>
                             <th class="text-center" style="width:220px;">Acciones</th>
                         </tr>
                     </thead>
@@ -90,7 +90,7 @@
                                              loading="lazy" />
                                     }
                                 </td>
-                                <td class="text-center"><span class="font-monospace">1</span></td>
+                                <td class="text-center"><span class="font-monospace">@item.PujasSubasta</span></td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group" aria-label="Acciones">
                                         <a asp-action="Details" asp-route-id="@item.IdSubasta" class="btn btn-outline-secondary px-3 py-2">

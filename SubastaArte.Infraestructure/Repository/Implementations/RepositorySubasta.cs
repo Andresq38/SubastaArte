@@ -35,6 +35,7 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                                         .Include(x => x.IdCreadorNavigation)
                                         .Include(x => x.IdEstadoSubastaNavigation)
                                         .Include(x => x.IdVendedorNavigation)
+                                        .Include(x => x.Puja)
                                         .FirstOrDefaultAsync();
             return @object!;
         }
@@ -51,6 +52,7 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                 .Include(x => x.IdCreadorNavigation)
                 .Include(x => x.IdEstadoSubastaNavigation)
                 .Include(x => x.IdVendedorNavigation)
+                .Include(x => x.Puja)
                 .AsNoTracking()
                 .ToListAsync();
             return collection;

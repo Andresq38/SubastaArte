@@ -31,13 +31,27 @@ namespace SubastaArte.Application.Services.Implementations
         {
             var @object = await _repository.FindByIdAsync(id);
             var objectMapped = _mapper.Map<SubastaDTO>(@object);
+
+           objectMapped.PujasSubasta = @object.Puja?.Count ?? 0;
+
+
             return objectMapped;
         }
 
         public async Task<ICollection<SubastaDTO>> ListAsync(int estadoId)
         {
             var list = await _repository.ListAsync(estadoId);
-            var collection = _mapper.Map<ICollection<SubastaDTO>>(list);
+
+            //var collection = _mapper.Map<ICollection<SubastaDTO>>(list);
+
+            // Cantidad de pujas por subasta / Cambiar Nombres de variables
+            var collection = list.Select(s =>
+            {
+                var dto = _mapper.Map<SubastaDTO>(s);
+                dto.PujasSubasta = s.Puja?.Count ?? 0;
+                return dto;
+            }).ToList();
+
             return collection;
         }
     }
