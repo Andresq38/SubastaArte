@@ -26,6 +26,6 @@ namespace SubastaArte.Application.DTOs
         public UsuarioDTO IdUsuarioNavigation { get; set; } = new();
 
         [DisplayName("Subasta")]
-        public UsuarioDTO IdSubastaNavigation { get; set; } = new();
+        public SubastaDTO IdSubastaNavigation { get; set; } = new();
     }
 }

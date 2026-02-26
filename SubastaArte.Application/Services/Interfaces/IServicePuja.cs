@@ -11,5 +11,7 @@ namespace SubastaArte.Application.Services.Interfaces
     {
         Task<ICollection<PujaDTO>> ListAsync();
         Task<PujaDTO?> FindByIdAsync(int id);
+
+        Task<ICollection<PujaDTO>> ListSubastaIdAsync(int idSubasta);
     }
 }

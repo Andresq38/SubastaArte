@@ -1,10 +1,10 @@
-﻿@*@model IEnumerable<SubastaArte.Application.DTOs.ObjetoDTO>  *@
-@model X.PagedList.IPagedList<SubastaArte.Application.DTOs.SubastaDTO>
+﻿@* @model IEnumerable<SubastaArte.Application.DTOs.PujaDTO> *@
+@model X.PagedList.IPagedList<SubastaArte.Application.DTOs.PujaDTO>
 @using X.PagedList
 @using X.PagedList.Mvc.Core
 
 @{
-    ViewData["Title"] = "Administración de Subastas por Objeto";
+    ViewData["Title"] = "Administración de Pujas por Subasta";
     var total = Model?.Count() ?? 0;
 }
 
@@ -13,27 +13,26 @@
         <li class="breadcrumb-item">
             <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Inicio</a>
         </li>
-        <li class="breadcrumb-item active" aria-current="page">Gestión subastas por Objeto</li>
+        <li class="breadcrumb-item active" aria-current="page">Gestión de pujas por subasta</li>
     </ol>
 </nav>
 
 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
     <div>
-        <h1 class="h3 mb-1">Subastas por Objeto</h1>
-        <p class="text-muted mb-0">Gestión administrativa de subastas por Objeto. Total: <strong>@total</strong>.</p>
+        <h1 class="h3 mb-1">Pujas por Subasta</h1>
+        <p class="text-muted mb-0">Gestión administrativa de pujas por subasta. Total: <strong>@total</strong>.</p>
     </div>
-
-    <div class="d-flex gap-2">
-        <a asp-controller="Objeto" asp-action="Details" asp-route-id="@Model.First().IdObjeto" class="btn btn-outline-secondary">
+    @* Posible soluciuon para retornar sin tener que definir estados y demas *@
+    @* <div class="d-flex gap-2">
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Volver al Detalle objeto
         </a>
-    </div>
-
+    </div> *@
 </div>
 
 <div class="card shadow-sm border-0">
     <div class="card-header bg-body d-flex justify-content-between align-items-center">
-        <span class="fw-semibold">Listado se subastas por Objeto</span>
+        <span class="fw-semibold">Listado</span>
 
         <span class="small text-muted">
             Mostrando
@@ -48,7 +47,11 @@
         {
             <div class="p-4 text-center">
                 <div class="display-6 mb-2"><i class="bi bi-inbox"></i></div>
-                <h2 class="h5">No hay subastas registradas</h2>
+                <h2 class="h5">No hay pujas registradas</h2>
+                <p class="text-muted mb-3">Crea la primera Puja para iniciar.</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Crear Puja
+                </a>
             </div>
         }
         else
@@ -57,42 +60,25 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light position-sticky top-0" style="z-index:1;">
                         <tr>
-                            <th class="ps-3" style="width:80px;">  @Html.DisplayNameFor(model => model.First().IdSubasta)</th>
-                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().FechaInicio)</th>
-                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().FechaCierre)</th>
-                            <th class="text-center" style="width:120px;">@Html.DisplayNameFor(model => model.First().IdEstadoSubastaNavigation)</th>
+                            <th class="ps-3" style="width:80px;">ID subasta</th>
+                            <th class="ps-3" style="width:80px;">Nombre subasta</th>
+                            <th class="text-center" style="width:170px;">Usuario que realizo la puja</th>
+                            <th class="text-center" style="width:170px;">Monto Ofertado</th>
+                            <th class="text-center" style="width:120px;">Fecha y Hora de la Puja</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            foreach (var subasta in Model)
-                            {
-                                <tr>
-                                    <td class="ps-3">
-                                        @subasta.IdSubasta
-                                    </td>
-
-                                    <td class="text-center">
-                                        @subasta.FechaInicio.ToShortDateString()
-                                    </td>
-
-                                    <td class ="text-center">
-                                        @subasta.FechaCierre.ToShortDateString()
-                                    </td>
-
-                                    <td class ="text-center">
-                                        @(subasta.IdEstadoSubastaNavigation?.Nombre ?? "Sin estado")
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
+                        @foreach (var item in Model)
                         {
                             <tr>
-                                <td colspan="4" class="text-center text-muted">
-                                    Sin subastas
+                                <td class="ps-3">
+                                    <span class="badge text-bg-light border">@item.IdSubasta</span>
                                 </td>
+                                <td class="text-center"><span class="font-monospace">@item.IdSubastaNavigation.Nombre</span></td>
+                                <td class="text-center"><span class="font-monospace">@item.IdUsuarioNavigation.Nombre @item.IdUsuarioNavigation.Apellido1 @item.IdUsuarioNavigation.Apellido2</span></td>
+                                <td class="text-center"><span class="font-monospace">@item.Monto</span></td>
+                                <td class="text-center"><span class="font-monospace">@item.FechaHora</span></td>
+                                
                             </tr>
                         }
                     </tbody>
@@ -109,10 +95,10 @@
                 Página <strong>@Model.PageNumber</strong> de <strong>@Model.PageCount</strong>
             </div>
 
-            <nav aria-label="Paginación de Objetos">
+            <nav aria-label="Paginación de Subastas Activas">
                 @Html.PagedListPager(
                          Model,
-                         page => Url.Action("SubastasObjetos", new { page }),
+                         page => Url.Action("IndexPS", new { page }),
                          new PagedListRenderOptions
             {
                 UlElementClasses = new[] { "pagination", "mb-0" },

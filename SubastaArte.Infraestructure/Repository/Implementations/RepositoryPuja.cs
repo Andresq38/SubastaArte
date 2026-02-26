@@ -39,5 +39,18 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                 .ToListAsync();
             return collection;
         }
+
+        public async Task<ICollection<Puja>> ListSubastaIdAsync(int idSubasta)
+        {
+            //Select * from Puja con ID subasta determinado
+            var collection = await _context.Set<Puja>()
+                .Where(x => x.IdSubasta == idSubasta)
+                .Include(x => x.IdUsuarioNavigation)
+                .Include(x => x.IdSubastaNavigation)
+                .OrderBy(x => x.FechaHora)
+                .AsNoTracking()
+                .ToListAsync();
+            return collection;
+        }
     }
 }

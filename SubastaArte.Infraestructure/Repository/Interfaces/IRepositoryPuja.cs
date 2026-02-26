@@ -11,5 +11,8 @@ namespace SubastaArte.Infraestructure.Repository.Interfaces
     {
         Task<ICollection<Puja>> ListAsync();
         Task<Puja> FindByIdAsync(int id);
+
+        Task<ICollection<Puja>> ListSubastaIdAsync(int idSubasta);
+
     }
 }
