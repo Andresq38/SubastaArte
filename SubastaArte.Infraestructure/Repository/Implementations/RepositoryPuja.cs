@@ -47,7 +47,7 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                 .Where(x => x.IdSubasta == idSubasta)
                 .Include(x => x.IdUsuarioNavigation)
                 .Include(x => x.IdSubastaNavigation)
-                .OrderBy(x => x.FechaHora)
+                .OrderByDescending(x => x.FechaHora)
                 .AsNoTracking()
                 .ToListAsync();
             return collection;
