@@ -12,5 +12,9 @@ namespace SubastaArte.Application.Services.Interfaces
     {
         Task<ICollection<UsuarioDTO>> ListAsync();
         Task<UsuarioDTO?> FindByIdAsync(int id);
+
+        Task UpdateAsync(int id, UsuarioDTO dto);
+        //Metodo para poder modificar el estado del usuario a activo o inactivo(bloqueado)
+        Task ChangeEstadoAsync(int idUsuario, int idEstadoUsuario);
     }
 }

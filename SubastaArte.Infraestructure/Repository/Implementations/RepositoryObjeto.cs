@@ -19,15 +19,54 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
             _context = context;
         }
 
-        public Task<int> AddAsync(Objeto entity, string[] selectedCategorias)
+        public async Task<int> AddAsync(Objeto entity, string[] selectedCategorias)
         {
-            throw new NotImplementedException();
+            // Asignar categorías al objeto
+            await ApplyCategoriasAsync(entity, selectedCategorias);
+
+            // Agregar el objeto a la base de datos
+            await _context.Set<Objeto>().AddAsync(entity);
+            await _context.SaveChangesAsync();
+
+            return entity.IdObjeto;
         }
 
         public Task DeleteAsync(int id)
         {
             throw new NotImplementedException();
         }
+
+        private async Task ApplyCategoriasAsync(Objeto objetoToUpdate, string[] selectedCategorias)
+        {
+            // Si no enviaron categorías, se establece vacío
+            if (selectedCategorias == null || selectedCategorias.Length == 0)
+            {
+                objetoToUpdate.IdCategoria = new List<Categoria>();
+                return;
+            }
+
+            // Parse seguro
+            var ids = selectedCategorias
+                .Select(x => int.TryParse(x, out var n) ? n : (int?)null)
+                .Where(x => x.HasValue)
+                .Select(x => x!.Value)
+                .Distinct()
+                .ToList();
+
+            if (ids.Count == 0)
+            {
+                objetoToUpdate.IdCategoria = new List<Categoria>();
+                return;
+            }
+
+            // Trae SOLO las categorías requeridas
+            var categorias = await _context.Categoria
+                .Where(c => ids.Contains(c.IdCategoria))
+                .ToListAsync();
+
+            objetoToUpdate.IdCategoria = categorias;
+        }
+
 
         public async Task<Objeto> FindByIdAsync(int id)
         {
@@ -72,5 +111,6 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
         {
             throw new NotImplementedException();
         }
+
     }
 }

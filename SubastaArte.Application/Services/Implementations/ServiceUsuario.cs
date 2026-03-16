@@ -22,6 +22,11 @@ namespace SubastaArte.Application.Services.Implementations
             _mapper = mapper;
         }
 
+        public async Task ChangeEstadoAsync(int idUsuario, int idEstadoUsuario)
+        {
+            await _repository.ChangeEstadoAsync(idUsuario, idEstadoUsuario);
+        }
+
         public async Task<UsuarioDTO?> FindByIdAsync(int id)
         {
             var @object = await _repository.FindByIdAsync(id);
@@ -46,6 +51,24 @@ namespace SubastaArte.Application.Services.Implementations
             var list = await _repository.ListAsync();
             var collection = _mapper.Map<ICollection<UsuarioDTO>>(list);
             return collection;
+        }
+
+        public async Task UpdateAsync(int id, UsuarioDTO dto)
+        {
+            // Trae el usuario original (trackeado)
+            var entity = await _repository.FindByIdAsync(id);
+            if (entity == null)
+                throw new Exception("Usuario no encontrado");
+
+            // Actualiza solo los campos permitidos
+            entity.Nombre = dto.Nombre;
+            entity.Apellido1 = dto.Apellido1;
+            entity.Apellido2 = dto.Apellido2;
+            entity.Email = dto.Email;
+
+            // No se modifica: Rol, FechaRegistro, EstadoUsuario
+
+            await _repository.UpdateAsync(entity);
         }
     }
 }

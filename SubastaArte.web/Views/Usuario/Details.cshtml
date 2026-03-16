@@ -34,6 +34,9 @@
         <a asp-action="Delete" asp-route-id="@Model.IdUsuario" class="btn btn-outline-danger">
             <i class="bi bi-trash me-1"></i> Eliminar
         </a>
+
+
+
     </div>
 </div>
 
@@ -116,8 +119,21 @@
         <a asp-action="Index" class="btn btn-outline-primary">
             <i class="bi bi-list-ul me-1"></i> Ir al listado
         </a>
-        <a asp-action="Edit" asp-route-id="@Model.IdUsuario" class="btn btn-primary">
-            <i class="bi bi-pencil-square me-1"></i> Editar
-        </a>
+        @{
+            // 1 = Activo, 2 = Inactivo (ajusta si tus IDs son diferentes)
+            var esActivo = Model.IdEstadoUsuario == 1;
+            var textoBoton = esActivo ? "Bloquear usuario" : "Activar usuario";
+            var nuevoEstado = esActivo ? 2 : 1;
+            var colorBoton = esActivo ? "btn-outline-danger" : "btn-outline-success";
+        }
+
+        <form asp-action="ChangeEstado" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.IdUsuario" />
+            <input type="hidden" name="idEstadoUsuario" value="@nuevoEstado" />
+            <button type="submit" class="btn @colorBoton">
+                <i class="bi bi-shield-lock me-1"></i> @textoBoton
+            </button>
+        </form>
     </div>
 </div>

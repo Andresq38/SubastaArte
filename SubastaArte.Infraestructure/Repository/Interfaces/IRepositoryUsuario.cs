@@ -11,5 +11,9 @@ namespace SubastaArte.Infraestructure.Repository.Interfaces
     {
         Task<ICollection<Usuario>> ListAsync();
         Task<Usuario> FindByIdAsync(int id);
+        Task UpdateAsync(Usuario entity);
+        //Metodo para poder modificar el estado del usuario a activo o inactivo(bloqueado)
+        Task ChangeEstadoAsync(int idUsuario, int idEstadoUsuario);
     }
 }
+

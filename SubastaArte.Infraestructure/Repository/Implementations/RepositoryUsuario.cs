@@ -43,5 +43,33 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                 .ToListAsync();
             return collection;
         }
+
+        public async Task UpdateAsync(Usuario entity)
+        {
+            // Busca el usuario original en la base de datos
+            var usuario = await _context.Usuario.FindAsync(entity.IdUsuario);
+            if (usuario == null)
+                throw new Exception("Usuario no encontrado");
+
+            // Actualiza solo los campos permitidos
+            usuario.Nombre = entity.Nombre;
+            usuario.Apellido1 = entity.Apellido1;
+            usuario.Apellido2 = entity.Apellido2;
+            usuario.Email = entity.Email;
+
+            // No se modifica: Rol, FechaRegistro, EstadoUsuario
+
+            await _context.SaveChangesAsync();
+        }
+        public async Task ChangeEstadoAsync(int idUsuario, int idEstadoUsuario)
+        {
+            var usuario = await _context.Usuario.FindAsync(idUsuario);
+            if (usuario == null)
+                throw new Exception("Usuario no encontrado");
+
+            usuario.IdEstadoUsuario = idEstadoUsuario;
+
+            await _context.SaveChangesAsync();
+        }
     }
 }
