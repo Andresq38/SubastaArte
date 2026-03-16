@@ -14,10 +14,14 @@ namespace SubastaArte.web.Controllers
     public class ObjetoController : Controller
     {
         private readonly IServiceObjeto _serviceObjeto;
+        private readonly IServiceUsuario _serviceUsuario;
+        private readonly IServiceCategoria _serviceCategoria;
 
-        public ObjetoController(IServiceObjeto serviceObjeto)
+        public ObjetoController(IServiceObjeto serviceObjeto, IServiceUsuario serviceUsuario, IServiceCategoria serviceCategoria)
         {
             _serviceObjeto = serviceObjeto;
+            _serviceUsuario = serviceUsuario;
+            _serviceCategoria = serviceCategoria;
         }
 
         [HttpGet]
@@ -86,5 +90,112 @@ namespace SubastaArte.web.Controllers
                 throw new Exception(ex.Message);
             }
         }
+
+        // -------------------------
+        // Helpers para combos
+        // -------------------------
+        private async Task LoadCombosAsync(IEnumerable<string>? selectedCategoriaIds = null)
+        {
+            // Autores
+            ViewBag.ListAutor = await _serviceUsuario.ListAsync();
+
+            // Categorías (many-to-many)
+            var categorias = await _serviceCategoria.ListAsync();
+
+            ViewBag.ListCategorias = new MultiSelectList(
+                items: categorias,
+                dataValueField: nameof(CategoriaDTO.IdCategoria),
+                dataTextField: nameof(CategoriaDTO.Nombre),
+                selectedValues: selectedCategoriaIds
+            );
+        }
+
+        // GET: ObjetoController/Create
+        public async Task<ActionResult> Create()
+        {
+            await LoadCombosAsync();
+            // Cargar el usuario vendedor (ID 2)
+            var vendedor = await _serviceUsuario.FindByIdAsync(2);
+            ViewBag.Vendedor = vendedor;
+            return View(new ObjetoDTO());
+        }
+
+        // POST: ObjetoController/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Create(ObjetoDTO dto, List<IFormFile> imagenes, string[] selectedCategorias)
+        {
+            selectedCategorias ??= Array.Empty<string>();
+
+            // Validación de categorías 
+            if (selectedCategorias.Length == 0)
+            {
+                ModelState.AddModelError("selectedCategorias", "Debe seleccionar al menos una categoría.");
+            }
+
+            // Validación de imágenes (mínimo 1)
+            if ((dto.Foto == null || dto.Foto.Count == 0) && (imagenes == null || imagenes.Count == 0))
+            {
+                ModelState.AddModelError("Foto", "Debe seleccionar al menos una imagen.");
+            }
+
+            // Procesar imágenes subidas
+            if (imagenes != null && imagenes.Count > 0)
+            {
+                dto.Foto = new List<ImagenDTO>();
+                foreach (var img in imagenes)
+                {
+                    if (img.Length > 0)
+                    {
+                        using var ms = new MemoryStream();
+                        await img.CopyToAsync(ms);
+                        dto.Foto.Add(new ImagenDTO { Foto = ms.ToArray() });
+                    }
+                }
+                ModelState.Remove("Foto");
+            }
+
+            // Validación de nombre y descripción
+            if (string.IsNullOrWhiteSpace(dto.Nombre))
+                ModelState.AddModelError("Nombre", "El nombre es requerido.");
+            if (string.IsNullOrWhiteSpace(dto.Descripcion) || dto.Descripcion.Length < 20)
+                ModelState.AddModelError("Descripcion", "La descripción debe tener al menos 20 caracteres.");
+
+            if (!ModelState.IsValid)
+            {
+                var errores = string.Join("<br>",
+                    ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                );
+
+                ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
+                    "Errores de validación",
+                    $"El formulario contiene errores:<br>{errores}",
+                    SweetAlertMessageType.warning
+                );
+                await LoadCombosAsync(selectedCategorias);
+                var vendedor = await _serviceUsuario.FindByIdAsync(2);
+                ViewBag.Vendedor = vendedor;
+                return View(dto);
+            }
+
+            // Asignar usuario vendedor simulado y estado activo
+            dto.IdVendedor = 2; // Simula el usuario actual
+            dto.IdEstadoObjeto = 1; // Estado inicial activo (ajusta según tu catálogo)
+
+            await _serviceObjeto.AddAsync(dto, selectedCategorias);
+
+            TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+               "Objeto creado correctamente",
+               $"El objeto {dto.Nombre} fue registrado exitosamente.",
+               SweetAlertMessageType.success
+           );
+            return RedirectToAction(nameof(IndexAdmin));
+        }
+
+
+
+
     }
 }

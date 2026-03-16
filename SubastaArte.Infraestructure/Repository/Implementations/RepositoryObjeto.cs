@@ -24,6 +24,9 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
             // Asignar categorías al objeto
             await ApplyCategoriasAsync(entity, selectedCategorias);
 
+            // Aplica la relación de imágenes
+            ApplyImagenes(entity);
+
             // Agregar el objeto a la base de datos
             await _context.Set<Objeto>().AddAsync(entity);
             await _context.SaveChangesAsync();
@@ -67,6 +70,17 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
             objetoToUpdate.IdCategoria = categorias;
         }
 
+        private void ApplyImagenes(Objeto objetoToUpdate)
+        {
+            if (objetoToUpdate.Foto == null || !objetoToUpdate.Foto.Any())
+                return;
+
+            foreach (var imagen in objetoToUpdate.Foto)
+            {
+                // Asocia la imagen al objeto (relación inversa)
+                imagen.IdObjetoNavigation = objetoToUpdate;
+            }
+        }
 
         public async Task<Objeto> FindByIdAsync(int id)
         {
