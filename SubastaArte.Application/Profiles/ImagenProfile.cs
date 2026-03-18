@@ -13,9 +13,9 @@ namespace SubastaArte.Application.Profiles
     {
         public ImagenProfile()
         {
-            CreateMap<ImagenDTO, Imagen>().ReverseMap();
-            CreateMap<ImagenDTO, Imagen>()
-            .ForMember(dest => dest.IdObjetoNavigation, orig => orig.Ignore());
+            CreateMap<Imagen, ImagenDTO>();
+
+            CreateMap<ImagenDTO, Imagen>();
         }
     }
 }

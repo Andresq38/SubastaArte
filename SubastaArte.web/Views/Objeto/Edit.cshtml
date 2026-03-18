@@ -1,0 +1,192 @@
+﻿@model SubastaArte.Application.DTOs.ObjetoDTO
+
+@{
+    ViewData["Title"] = "Editar Objeto";
+    var categorias = ViewBag.ListCategorias as MultiSelectList;
+    var vendedor = ViewBag.Vendedor as SubastaArte.Application.DTOs.UsuarioDTO;
+}
+
+<header class="mb-3">
+    <h1 class="h3 mb-0">Editar objeto subastable</h1>
+    <p class="text-muted mb-0">Mantenimiento: actualización del objeto</p>
+</header>
+
+<form asp-action="Edit" asp-route-id="@Model.IdObjeto" method="post" enctype="multipart/form-data" class="row g-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input asp-for="IdObjeto" type="hidden" />
+    <input asp-for="IdVendedor" type="hidden" />
+    <input asp-for="IdEstadoObjeto" type="hidden" />
+
+    <div class="col-12">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Descripcion" class="form-label"></label>
+        <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Descripcion" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Condicion" class="form-label"></label>
+        <select asp-for="Condicion" class="form-select">
+            <option value="">Seleccione una condición</option>
+            <option value="Nuevo">Nuevo</option>
+            <option value="Como nuevo">Como nuevo</option>
+            <option value="Excelente estado">Excelente estado</option>
+            <option value="Muy buen estado">Muy buen estado</option>
+            <option value="Buen estado">Buen estado</option>
+            <option value="Estado aceptable">Estado aceptable</option>
+        </select>
+        <span asp-validation-for="Condicion" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Estado inicial</label>
+        <input class="form-control" value="@(Model.IdEstadoObjetoNavigation?.Nombre ?? "Activo")" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Usuario vendedor</label>
+        <input class="form-control" value="@(vendedor != null ? $"{vendedor.Nombre} {vendedor.Apellido1} {vendedor.Apellido2}" : "Vendedor no encontrado")" readonly />
+    </div>
+
+    <div class="col-12">
+        <label class="form-label">Categorías</label>
+        <select id="selectedCategorias"
+                name="selectedCategorias"
+                class="form-select"
+                asp-items="categorias"
+                multiple>
+        </select>
+        <span id="selectedCategorias-error" class="text-danger"></span>
+        <div class="form-text">Puede seleccionar múltiples categorías.</div>
+    </div>
+
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                Imágenes actuales
+            </div>
+            <div class="card-body d-flex flex-wrap gap-3" id="imagenes-actuales">
+                @if (Model.Foto != null && Model.Foto.Any())
+                {
+                    foreach (var img in Model.Foto)
+                    {
+                        <div class="position-relative imagen-actual" data-id="@img.IdImagen">
+                            <img class="img-thumbnail"
+                                 style="max-height: 120px; width: 120px; object-fit:cover;"
+                                 src="data:image/jpeg;base64,@Convert.ToBase64String(img.Foto)"
+                                 alt="Imagen del objeto" />
+                            <button type="button"
+                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 btn-remove-img"
+                                    title="Eliminar imagen"
+                                    onclick="removeImage(@img.IdImagen)">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                            <input type="hidden" name="ImagenesConservar[]" value="@img.IdImagen" id="img-hidden-@img.IdImagen" />
+                        </div>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">No hay imágenes registradas.</span>
+                }
+            </div>
+
+            <div class="card-footer">
+                <label class="form-label" for="imagenes">Agregar nuevas imágenes</label>
+                <input type="file"
+                       id="imagenes"
+                       name="imagenes"
+                       class="form-control"
+                       accept="image/*"
+                       multiple />
+                <div class="form-text">Puede agregar más imágenes. Las imágenes eliminadas se quitarán al guardar.</div>
+                <figure class="mt-3">
+                    <figcaption class="text-muted small mt-2">Previsualización de las nuevas imágenes seleccionadas.</figcaption>
+                </figure>
+            </div>
+        </div>
+        <span asp-validation-for="Foto" class="text-danger"></span>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save2"></i> Guardar cambios
+        </button>
+        <a asp-action="IndexAdmin" class="btn btn-outline-secondary">
+            Volver
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Preview de nuevas imágenes seleccionadas
+        const input = document.getElementById('imagenes');
+        const figure = document.querySelector('figure');
+        let previewContainer = document.getElementById('previewContainer');
+        if (!previewContainer) {
+            previewContainer = document.createElement('div');
+            previewContainer.id = 'previewContainer';
+            previewContainer.className = 'd-flex flex-wrap gap-2 mt-2';
+            figure.appendChild(previewContainer);
+        }
+
+        input?.addEventListener('change', (e) => {
+            previewContainer.innerHTML = '';
+            const files = input.files;
+            if (!files || files.length === 0) {
+                return;
+            }
+            Array.from(files).forEach(file => {
+                const img = document.createElement('img');
+                img.className = 'img-thumbnail';
+                img.style.maxHeight = '120px';
+                img.style.maxWidth = '120px';
+                img.style.objectFit = 'cover';
+                img.alt = 'Previsualización';
+                img.src = URL.createObjectURL(file);
+                previewContainer.appendChild(img);
+            });
+        });
+
+        // Bootstrap Multiselect (asegúrate de tener la librería incluida)
+        $(document).ready(function () {
+            var $select = $('#selectedCategorias');
+            if ($.fn.multiselect) {
+                if ($select.data('multiselect')) {
+                    $select.multiselect('destroy');
+                }
+                $select.multiselect({
+                    buttonClass: 'form-select',
+                    templates: {
+                        button: '<button type="button" class="multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+                    },
+                    includeSelectAllOption: true,
+                    selectAllText: 'Seleccionar todas',
+                    allSelectedText: 'Todas las opciones',
+                    nonSelectedText: 'Seleccione una opción',
+                    nSelectedText: ' - seleccionadas',
+                });
+            }
+        });
+
+        function removeImage(id) {
+            // Oculta el div de la imagen
+            var div = document.querySelector('.imagen-actual[data-id="' + id + '"]');
+            if (div) div.style.display = 'none';
+            // Elimina el input hidden correspondiente
+            var input = document.getElementById('img-hidden-' + id);
+            if (input) input.remove();
+        }
+    </script>
+}
+

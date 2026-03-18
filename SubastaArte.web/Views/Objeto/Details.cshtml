@@ -26,6 +26,19 @@
         <a asp-controller="Objeto" asp-action="Index" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Volver al catálogo
         </a>
+
+        @{
+            // Verificar si el objeto pertenece a subastas activas o finalizadas
+            bool puedeEliminar = Model.Subasta?.Any(s => s.IdEstadoSubasta == 1 || s.IdEstadoSubasta == 2) != true;
+        }
+
+        <button type="button" class="btn btn-outline-danger"
+                data-objeto-id="@Model.IdObjeto"
+                data-objeto-nombre="@Model.Nombre"
+                data-puede-eliminar="@puedeEliminar.ToString().ToLower()"
+                onclick="handleDeleteClick(this)">
+            <i class="bi bi-trash me-1"></i> Eliminar
+        </button>
     </div>
 </div>
 
@@ -46,7 +59,7 @@
                         @foreach (var img in Model.Foto)
                         {
                             @* Una forma de ver imagenes *@
-                           @*  <div class="carousel-item @(primera ? "active" : "")">
+                            @*  <div class="carousel-item @(primera ? "active" : "")">
                                 <img class="w-100 rounded"
                                      style="max-height:500px; object-fit:cover;"
                                      src="data:image/jpeg;base64,@Convert.ToBase64String(img.Foto)"
@@ -98,7 +111,7 @@
                             <i class="bi bi-check-lg me-1"></i>
                             @Model.IdEstadoObjetoNavigation.Nombre
                         </span>
-                        
+
                     </div>
                 </header>
 
@@ -163,3 +176,73 @@
         </div>
     </div>
 </article>
+
+<!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0 bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-4 pb-3">
+                <div class="text-center mb-4">
+                    <div class="display-1 mb-3 text-primary">
+                        <i class="bi bi-trash"></i>
+                    </div>
+                    <h6 class="fw-semibold mb-3 text-dark">¿Está seguro que desea eliminar este objeto?</h6>
+                    <div class="p-3 rounded-3 mb-3 bg-light border-start border-4 border-primary">
+                        <p class="mb-1 text-dark">
+                            <strong>ID:</strong> @Model.IdObjeto
+                        </p>
+                        <p class="mb-0 text-dark">
+                            <strong>Nombre:</strong> <span class="fw-semibold">@Model.Nombre</span>
+                        </p>
+                    </div>
+                    <div class="alert alert-warning border-0 small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Esta acción no se puede deshacer y eliminará también todas las imágenes asociadas.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancelar
+                </button>
+                <form asp-action="Delete" asp-route-id="@Model.IdObjeto" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger px-4 fw-semibold">
+                        <i class="bi bi-trash me-1"></i>Eliminar Objeto
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleDeleteClick(button) {
+        const objetoId = button.getAttribute('data-objeto-id');
+        const objetoNombre = button.getAttribute('data-objeto-nombre');
+        const puedeEliminar = button.getAttribute('data-puede-eliminar') === 'true';
+
+        if (!puedeEliminar) {
+            // Mostrar SweetAlert de error
+            Swal.fire({
+                title: 'No se puede eliminar',
+                text: `No se puede eliminar el objeto "${objetoNombre}" porque pertenece a una subasta activa o finalizada.`,
+                icon: 'error',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
+        }
+
+        // Si se puede eliminar, mostrar el modal
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    }
+</script>
+

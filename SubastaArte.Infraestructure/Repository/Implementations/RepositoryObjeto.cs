@@ -34,10 +34,47 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
             return entity.IdObjeto;
         }
 
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            // Buscar el objeto con todas sus relaciones necesarias para validación
+            var objeto = await _context.Objeto
+                .Include(o => o.Subasta)
+                    .ThenInclude(s => s.IdEstadoSubastaNavigation)
+                .Include(o => o.Foto) // Incluir imágenes para eliminarlas también
+                .Include(o => o.IdCategoria) // ¡AGREGAR ESTA LÍNEA! - Incluir categorías
+                .FirstOrDefaultAsync(o => o.IdObjeto == id);
+
+            if (objeto == null)
+                throw new Exception($"Objeto con ID {id} no encontrado");
+
+            // Verificar si el objeto pertenece a subastas activas (estado 1) o finalizadas (estado 2)
+            bool perteneceASubastaActivaOFinalizada = objeto.Subasta?.Any(s => s.IdEstadoSubasta == 1 || s.IdEstadoSubasta == 2) == true;
+
+            if (perteneceASubastaActivaOFinalizada)
+            {
+                throw new InvalidOperationException(
+                    "No se puede eliminar el objeto porque pertenece a una subasta activa o finalizada.");
+            }
+
+            // Si llegamos aquí, el objeto SÍ se puede eliminar
+
+            // 1. LIMPIAR RELACIONES CON CATEGORÍAS (tabla ObjetoCategoria)
+            objeto.IdCategoria.Clear();
+
+            // 2. Eliminar todas las imágenes asociadas (cascade delete debería manejar esto, pero por seguridad)
+            if (objeto.Foto != null && objeto.Foto.Any())
+            {
+                _context.Imagen.RemoveRange(objeto.Foto);
+            }
+
+            // 3. Eliminar el objeto
+            _context.Objeto.Remove(objeto);
+
+            // 4. Guardar cambios
+            await _context.SaveChangesAsync();
         }
+
+
 
         private async Task ApplyCategoriasAsync(Objeto objetoToUpdate, string[] selectedCategorias)
         {
@@ -121,10 +158,69 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
             return collection;
         }
 
-        public Task UpdateAsync(Objeto entity, string[] selectedCategorias)
+        public async Task UpdateAsync(Objeto entity, string[] selectedCategorias)
         {
-            throw new NotImplementedException();
+            // Traer el objeto original desde la base de datos, incluyendo imágenes
+            var objetoDb = await _context.Objeto
+                .Include(o => o.Foto)
+                .Include(o => o.IdCategoria)
+                .FirstOrDefaultAsync(o => o.IdObjeto == entity.IdObjeto);
+
+            if (objetoDb == null)
+                throw new Exception("Objeto no encontrado");
+
+            // Verifica si el objeto está en una subasta activa
+            bool enSubastaActiva = await _context.Subasta
+                .AnyAsync(s => s.IdObjeto == entity.IdObjeto && s.IdEstadoSubasta == 1);
+
+            if (enSubastaActiva)
+                throw new InvalidOperationException("No se puede editar el objeto porque está en una subasta activa.");
+
+            // *** ACTUALIZAR PROPIEDADES BÁSICAS DEL OBJETO ***
+            objetoDb.Nombre = entity.Nombre;
+            objetoDb.Descripcion = entity.Descripcion;
+            objetoDb.Condicion = entity.Condicion;
+            objetoDb.FechaRegistro = DateTime.Now; // <-- AGREGAR ESTA LÍNEA
+
+            // Actualiza categorías
+            await ApplyCategoriasAsync(objetoDb, selectedCategorias);
+
+            // Resto del código igual...
+            var fotos = entity.Foto?.ToList() ?? new List<Imagen>();
+
+            var idsAConservar = fotos
+                .Where(f => f.IdImagen > 0)
+                .Select(f => f.IdImagen)
+                .ToList();
+
+            foreach (var img in objetoDb.Foto.ToList())
+            {
+                if (img.IdImagen > 0 && !idsAConservar.Contains(img.IdImagen))
+                {
+                    _context.Imagen.Remove(img);
+                }
+            }
+
+            foreach (var img in fotos.Where(f => f.IdImagen == 0 && f.Foto != null))
+            {
+                objetoDb.Foto.Add(new Imagen
+                {
+                    Foto = img.Foto
+                });
+            }
+
+            await _context.SaveChangesAsync();
         }
+
+
+
+
+
+
+
+
+
+
 
     }
 }

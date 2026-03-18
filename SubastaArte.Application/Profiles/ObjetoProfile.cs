@@ -27,8 +27,8 @@ namespace SubastaArte.Application.Profiles
             .ForMember(dest => dest.IdEstadoObjetoNavigation, orig => orig.Ignore())
             .ForMember(dest => dest.Subasta, orig => orig.Ignore())
             .ForMember(dest => dest.IdCategoria, orig => orig.Ignore());
-            
             //.ForMember(dest => dest.Foto, orig => orig.Ignore());
+
         }
     }
 }

@@ -127,9 +127,10 @@ public partial class SubastasContext : DbContext
 
             entity.HasOne(d => d.IdObjetoNavigation).WithMany(p => p.Foto)
                 .HasForeignKey(d => d.IdObjeto)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)  // <-- CAMBIAR A CASCADE
                 .HasConstraintName("FK_Imagen_Objeto");
         });
+
 
         modelBuilder.Entity<Objeto>(entity =>
         {

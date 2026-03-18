@@ -38,9 +38,9 @@ namespace SubastaArte.Application.Services.Implementations
 
         }
 
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            await _repository.DeleteAsync(id);
         }
 
         public async Task<ObjetoDTO> FindByIdAsync(int id)
@@ -67,9 +67,35 @@ namespace SubastaArte.Application.Services.Implementations
             return collection;
         }
 
-        public Task UpdateAsync(int id, ObjetoDTO dto, string[] selectedCategorias)
+        public async Task UpdateAsync(int id, ObjetoDTO dto, string[] selectedCategorias)
         {
-            throw new NotImplementedException();
+            // CREAR una entidad NUEVA solo con los campos básicos - SIN cargar relaciones
+            var entity = new Objeto
+            {
+                IdObjeto = id,
+                Nombre = dto.Nombre,
+                Descripcion = dto.Descripcion,
+                Condicion = dto.Condicion,
+                IdEstadoObjeto = dto.IdEstadoObjeto,
+                IdVendedor = dto.IdVendedor
+                // NO asignar FechaRegistro - se actualiza en el repository
+            };
+
+            // Mapear imágenes correctamente
+            entity.Foto = dto.Foto?
+                .Select(x => new Imagen
+                {
+                    IdImagen = x.IdImagen,
+                    Foto = x.Foto,
+                    IdObjeto = id
+                })
+                .ToList() ?? new List<Imagen>();
+
+            await _repository.UpdateAsync(entity, selectedCategorias);
         }
+
+
+
+
     }
 }

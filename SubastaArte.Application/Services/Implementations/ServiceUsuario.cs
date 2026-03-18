@@ -30,14 +30,17 @@ namespace SubastaArte.Application.Services.Implementations
         public async Task<UsuarioDTO?> FindByIdAsync(int id)
         {
             var @object = await _repository.FindByIdAsync(id);
-            var objectMapped = _mapper.Map<UsuarioDTO>(@object);
+            if (@object == null)
+                return null;
 
-            // Asigna la cantidad de subastas si es vendedor (IdRol == 2)
+            var objectMapped = _mapper.Map<UsuarioDTO>(@object);
+            if (objectMapped == null)
+                return null;
+
             if (objectMapped.IdRol == 2)
             {
                 objectMapped.CantidadSubastas = @object.SubastaIdVendedorNavigation?.Count ?? 0;
             }
-            // Asigna la cantidad de pujas si es comprador (IdRol == 3)
             else if (objectMapped.IdRol == 3)
             {
                 objectMapped.CantidadPujas = @object.Puja?.Count ?? 0;
@@ -45,6 +48,7 @@ namespace SubastaArte.Application.Services.Implementations
 
             return objectMapped;
         }
+
 
         public async Task<ICollection<UsuarioDTO>> ListAsync()
         {
