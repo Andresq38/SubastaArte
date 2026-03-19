@@ -166,9 +166,117 @@
                     <a asp-controller="Puja" asp-action="IndexPS" asp-route-idSubasta="@Model.IdSubasta" class="btn btn-outline-primary">
                         <i class="bi bi-clock-history me-1"></i> Historial de Pujas
                     </a>
+
+                    @* Botón Cancelar Subasta (solo si está activa) *@
+                    @if (Model.IdEstadoSubasta == 1) @* Solo para subastas activas *@
+                    {
+                        <button type="button" class="btn btn-outline-danger"
+                                data-subasta-id="@Model.IdSubasta"
+                                data-subasta-nombre="@Model.Nombre"
+                                data-pujas-cantidad="@Model.PujasSubasta"
+                                onclick="handleCancelarActivaClick(this)">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar Subasta
+                        </button>
+                    }
                 </div>
 
             </div>
         </div>
     </div>
+
+    <!-- MODAL DE CONFIRMACIÓN PARA CANCELAR SUBASTA ACTIVA -->
+    <div class="modal fade" id="cancelarActivaModal" tabindex="-1" aria-labelledby="cancelarActivaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0 bg-danger text-white">
+                    <h5 class="modal-title fw-bold" id="cancelarActivaModalLabel">
+                        <i class="bi bi-x-circle me-2"></i>Confirmar Cancelación de Subasta
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-4 pb-3">
+                    <div class="text-center mb-4">
+                        <div class="display-1 mb-3 text-danger">
+                            <i class="bi bi-x-circle"></i>
+                        </div>
+                        <h6 class="fw-semibold mb-3 text-dark">¿Está seguro que desea cancelar esta subasta?</h6>
+                        <div class="p-3 rounded-3 mb-3 bg-light border-start border-4 border-danger">
+                            <p class="mb-1 text-dark">
+                                <strong>ID:</strong> <span id="modalCancelarActivaSubastaId" class="fw-semibold"></span>
+                            </p>
+                            <p class="mb-1 text-dark">
+                                <strong>Nombre:</strong> <span id="modalCancelarActivaSubastaNombre" class="fw-semibold"></span>
+                            </p>
+                            <p class="mb-0 text-dark">
+                                <strong>Pujas:</strong> <span id="modalCancelarActivaPujas" class="fw-semibold"></span>
+                            </p>
+                        </div>
+                        <div class="alert alert-warning border-0 small mb-0">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            Esta acción no se puede deshacer. La subasta quedará cancelada permanentemente.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 pb-4">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>No cancelar
+                    </button>
+                    <form id="cancelarActivaForm" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idEstadoSubasta" value="4" />
+                        <button type="submit" class="btn btn-danger px-4 fw-semibold">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar Subasta
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+        <script>
+            function handleCancelarActivaClick(button) {
+                const subastaId = button.getAttribute('data-subasta-id');
+                const subastaNombre = button.getAttribute('data-subasta-nombre');
+                const pujasCantidad = parseInt(button.getAttribute('data-pujas-cantidad'));
+
+                // Validar si tiene pujas
+                if (pujasCantidad > 0) {
+                    // Mostrar SweetAlert de error si tiene pujas
+                    Swal.fire({
+                        title: 'No se puede cancelar',
+                        text: `No se puede cancelar la subasta "${subastaNombre}" porque ya tiene ${pujasCantidad} puja(s) registrada(s).`,
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#dc3545'
+                    });
+                    return;
+                }
+
+                // Si no tiene pujas, mostrar modal de confirmación
+                document.getElementById('modalCancelarActivaSubastaId').textContent = subastaId;
+                document.getElementById('modalCancelarActivaSubastaNombre').textContent = subastaNombre;
+                document.getElementById('modalCancelarActivaPujas').textContent = pujasCantidad;
+
+                // Configurar formulario
+                const cancelarForm = document.getElementById('cancelarActivaForm');
+                cancelarForm.action = '@Url.Action("ChangeEstado", "Subasta", new { returnTo = "IndexSA" })';
+
+                // Agregar campo hidden para el ID
+                let hiddenId = cancelarForm.querySelector('input[name="id"]');
+                if (!hiddenId) {
+                    hiddenId = document.createElement('input');
+                    hiddenId.type = 'hidden';
+                    hiddenId.name = 'id';
+                    cancelarForm.appendChild(hiddenId);
+                }
+                hiddenId.value = subastaId;
+
+                // Mostrar el modal
+                const cancelarModal = new bootstrap.Modal(document.getElementById('cancelarActivaModal'));
+                cancelarModal.show();
+            }
+        </script>
+    }
+
 </article>

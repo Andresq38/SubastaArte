@@ -1,0 +1,169 @@
+﻿@model SubastaArte.Application.DTOs.SubastaDTO
+
+@{
+    ViewData["Title"] = "Crear Subasta";
+    var objetos = ViewBag.ListObjetos as SelectList;
+    var usuarioActual = ViewBag.UsuarioActual as SubastaArte.Application.DTOs.UsuarioDTO;
+}
+
+<header class="mb-3">
+    <h1 class="h3 mb-0">Crear nueva subasta</h1>
+    <p class="text-muted mb-0">Mantenimiento: registro de una nueva subasta de objeto</p>
+</header>
+
+<form asp-action="Create" method="post" class="row g-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-12">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input asp-for="Nombre" class="form-control" autocomplete="off" placeholder="Ingrese el nombre de la subasta" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label class="form-label">Objeto a subastar</label>
+        <select id="selectedObjetos"
+                name="selectedObjetos"
+                class="form-select">
+            <option value="">Seleccione un objeto</option>
+            @if (objetos != null)
+            {
+                foreach (SelectListItem item in objetos)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            }
+        </select>
+        <span id="selectedObjetos-error" class="text-danger"></span>
+        <div class="form-text">Solo se muestran objetos activos sin subasta activa.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="FechaInicio" class="form-label"></label>
+        <input asp-for="FechaInicio" class="form-control" type="datetime-local" />
+        <span asp-validation-for="FechaInicio" class="text-danger"></span>
+        <div class="form-text">Fecha y hora de inicio de la subasta.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="FechaCierre" class="form-label"></label>
+        <input asp-for="FechaCierre" class="form-control" type="datetime-local" />
+        <span asp-validation-for="FechaCierre" class="text-danger"></span>
+        <div class="form-text">Debe ser mayor a la fecha de inicio.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="PrecioBase" class="form-label"></label>
+        <div class="input-group">
+            <span class="input-group-text">₡</span>
+            <input asp-for="PrecioBase" class="form-control" type="number" step="0.01" min="0.01" placeholder="0.00" />
+        </div>
+        <span asp-validation-for="PrecioBase" class="text-danger"></span>
+        <div class="form-text">Precio inicial de la subasta (debe ser mayor a cero).</div>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="IncrementoMinimo" class="form-label"></label>
+        <div class="input-group">
+            <span class="input-group-text">₡</span>
+            <input asp-for="IncrementoMinimo" class="form-control" type="number" step="0.01" min="0.01" placeholder="0.00" />
+        </div>
+        <span asp-validation-for="IncrementoMinimo" class="text-danger"></span>
+        <div class="form-text">Monto mínimo para incrementar pujas (debe ser mayor a cero).</div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Estado inicial</label>
+        <input class="form-control" value="No activa" readonly />
+        <div class="form-text">La subasta se crea en estado "No activa" por defecto.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Usuario creador</label>
+        <input class="form-control" value="@(usuarioActual != null ? $"{usuarioActual.Nombre} {usuarioActual.Apellido1} {usuarioActual.Apellido2}" : "Usuario no encontrado")" readonly />
+        <div class="form-text">Usuario que crea la subasta (asignado automáticamente).</div>
+    </div>
+
+    <div class="col-12">
+        <div class="alert alert-info border-0" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Información importante:</strong>
+            <ul class="mb-0 mt-2">
+                <li>El usuario vendedor se asignará automáticamente según el objeto seleccionado.</li>
+                <li>La subasta se creará en estado "No activa" y deberá ser activada posteriormente.</li>
+                <li>Solo se pueden subastar objetos que estén activos y sin otra subasta activa.</li>
+                <li>La fecha de cierre debe ser mayor a la fecha de inicio.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check2-circle"></i> Crear Subasta
+        </button>
+        <a asp-action="IndexAdmin" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Configurar fechas mínimas
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaInicio = document.querySelector('input[name="FechaInicio"]');
+            const fechaCierre = document.querySelector('input[name="FechaCierre"]');
+
+            // Establecer fecha mínima como ahora
+            const now = new Date();
+            const nowString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+
+            if (fechaInicio) {
+                fechaInicio.min = nowString;
+
+                // Cuando cambia fecha inicio, actualizar mínimo de fecha cierre
+                fechaInicio.addEventListener('change', function() {
+                    if (fechaCierre && this.value) {
+                        fechaCierre.min = this.value;
+
+                        // Si fecha cierre es menor que inicio, limpiarla
+                        if (fechaCierre.value && fechaCierre.value <= this.value) {
+                            fechaCierre.value = '';
+                        }
+                    }
+                });
+            }
+
+            if (fechaCierre) {
+                fechaCierre.min = nowString;
+            }
+
+            // Validación de precios en tiempo real
+            const precioBase = document.querySelector('input[name="PrecioBase"]');
+            const incrementoMinimo = document.querySelector('input[name="IncrementoMinimo"]');
+
+            if (precioBase) {
+                precioBase.addEventListener('input', function() {
+                    if (this.value && parseFloat(this.value) <= 0) {
+                        this.setCustomValidity('El precio base debe ser mayor a cero');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+
+            if (incrementoMinimo) {
+                incrementoMinimo.addEventListener('input', function() {
+                    if (this.value && parseFloat(this.value) <= 0) {
+                        this.setCustomValidity('El incremento mínimo debe ser mayor a cero');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+        });
+    </script>
+}
+

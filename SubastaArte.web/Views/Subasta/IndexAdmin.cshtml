@@ -4,7 +4,7 @@
 @using X.PagedList.Mvc.Core
 
 @{
-    ViewData["Title"] = "Administración de Subastas Activas";
+    ViewData["Title"] = "Administración de Subastas No Activas";
     var total = Model?.Count() ?? 0;
 }
 
@@ -13,14 +13,14 @@
         <li class="breadcrumb-item">
             <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Inicio</a>
         </li>
-        <li class="breadcrumb-item active" aria-current="page">Gestión de Subastas Activas</li>
+        <li class="breadcrumb-item active" aria-current="page">Gestión de Subastas No Activas</li>
     </ol>
 </nav>
 
 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
     <div>
-        <h1 class="h3 mb-1">Subastas Activas</h1>
-        <p class="text-muted mb-0">Gestión administrativa de subastas activas. Total: <strong>@total</strong>.</p>
+        <h1 class="h3 mb-1">Subastas No Activas</h1>
+        <p class="text-muted mb-0">Gestión administrativa de subastas No activas. Total: <strong>@total</strong>.</p>
     </div>
 
     <div class="d-flex flex-wrap gap-2">
@@ -47,7 +47,7 @@
         {
             <div class="p-4 text-center">
                 <div class="display-6 mb-2"><i class="bi bi-inbox"></i></div>
-                <h2 class="h5">No hay Subastas Activas</h2>
+                <h2 class="h5">No hay subastas sin activar</h2>
                 <p class="text-muted mb-3">Crea la primera Subasta para iniciar.</p>
                 <a asp-action="Create" class="btn btn-primary">
                     <i class="bi bi-plus-lg me-1"></i> Crear Subasta
@@ -64,7 +64,7 @@
                             <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().FechaInicio)</th>
                             <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().FechaCierre)</th>
                             <th class="text-center" style="width:120px;">Imagen</th>
-                            <th class="text-center" style="width:170px;">  Cantidad de Pujas</th>
+                            <th class="text-center" style="width:170px;">  @Html.DisplayNameFor(model => model.First().IdEstadoSubastaNavigation)</th>
                             <th class="text-center" style="width:220px;">Acciones</th>
                         </tr>
                     </thead>
@@ -90,19 +90,27 @@
                                              loading="lazy" />
                                     }
                                 </td>
-                                <td class="text-center"><span class="font-monospace">@item.PujasSubasta</span></td>
+                                <td class="text-center"><span class="font-monospace">@item.IdEstadoSubastaNavigation.Nombre</span></td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group" aria-label="Acciones">
-                                        <a asp-action="Details" asp-route-id="@item.IdSubasta" class="btn btn-outline-secondary px-3 py-2">
-                                            <i class="bi bi-eye"></i><span class="d-none d-lg-inline ms-1">Detalle</span>
+                                        @* Botón Editar *@
+                                        <a asp-action="Edit" asp-route-id="@item.IdSubasta" class="btn btn-outline-primary px-3 py-2">
+                                            <i class="bi bi-pencil-square"></i><span class="d-none d-lg-inline ms-1">Editar</span>
                                         </a>
 
-                                        @* Botón Cancelar (con validación de pujas) *@
+                                        @* Botón Publicar (con confirmación) *@
+                                        <button type="button" class="btn btn-outline-success px-3 py-2"
+                                                data-subasta-id="@item.IdSubasta"
+                                                data-subasta-nombre="@item.Nombre"
+                                                onclick="handlePublicarClick(this)">
+                                            <i class="bi bi-broadcast"></i><span class="d-none d-lg-inline ms-1">Publicar</span>
+                                        </button>
+
+                                        @* Botón Cancelar (con confirmación) *@
                                         <button type="button" class="btn btn-outline-danger px-3 py-2"
                                                 data-subasta-id="@item.IdSubasta"
                                                 data-subasta-nombre="@item.Nombre"
-                                                data-pujas-cantidad="@item.PujasSubasta"
-                                                onclick="handleCancelarActivaClick(this)">
+                                                onclick="handleCancelarClick(this)">
                                             <i class="bi bi-x-circle"></i><span class="d-none d-lg-inline ms-1">Cancelar</span>
                                         </button>
                                     </div>
@@ -145,13 +153,59 @@
         </div>
     }
 
-    <!-- MODAL DE CONFIRMACIÓN PARA CANCELAR SUBASTA ACTIVA -->
-    <div class="modal fade" id="cancelarActivaModal" tabindex="-1" aria-labelledby="cancelarActivaModalLabel" aria-hidden="true">
+    <!-- MODAL DE CONFIRMACIÓN PARA PUBLICAR -->
+    <div class="modal fade" id="publicarModal" tabindex="-1" aria-labelledby="publicarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0 bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="publicarModalLabel">
+                        <i class="bi bi-broadcast me-2"></i>Confirmar Publicación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-4 pb-3">
+                    <div class="text-center mb-4">
+                        <div class="display-1 mb-3 text-success">
+                            <i class="bi bi-broadcast"></i>
+                        </div>
+                        <h6 class="fw-semibold mb-3 text-dark">¿Está seguro que desea publicar esta subasta?</h6>
+                        <div class="p-3 rounded-3 mb-3 bg-light border-start border-4 border-success">
+                            <p class="mb-1 text-dark">
+                                <strong>ID:</strong> <span id="modalSubastaId" class="fw-semibold"></span>
+                            </p>
+                            <p class="mb-0 text-dark">
+                                <strong>Nombre:</strong> <span id="modalSubastaNombre" class="fw-semibold"></span>
+                            </p>
+                        </div>
+                        <div class="alert alert-info border-0 small mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Una vez publicada, la subasta estará visible para todos los usuarios.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 pb-4">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Cancelar
+                    </button>
+                    <form id="publicarForm" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idEstadoSubasta" value="1" />
+                        <button type="submit" class="btn btn-success px-4 fw-semibold">
+                            <i class="bi bi-broadcast me-1"></i>Publicar Subasta
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN PARA CANCELAR -->
+    <div class="modal fade" id="cancelarModal" tabindex="-1" aria-labelledby="cancelarModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header border-0 pb-0 bg-danger text-white">
-                    <h5 class="modal-title fw-bold" id="cancelarActivaModalLabel">
-                        <i class="bi bi-x-circle me-2"></i>Confirmar Cancelación de Subasta Activa
+                    <h5 class="modal-title fw-bold" id="cancelarModalLabel">
+                        <i class="bi bi-x-circle me-2"></i>Confirmar Cancelación
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -160,16 +214,13 @@
                         <div class="display-1 mb-3 text-danger">
                             <i class="bi bi-x-circle"></i>
                         </div>
-                        <h6 class="fw-semibold mb-3 text-dark">¿Está seguro que desea cancelar esta subasta activa?</h6>
+                        <h6 class="fw-semibold mb-3 text-dark">¿Está seguro que desea cancelar esta subasta?</h6>
                         <div class="p-3 rounded-3 mb-3 bg-light border-start border-4 border-danger">
                             <p class="mb-1 text-dark">
-                                <strong>ID:</strong> <span id="modalCancelarActivaSubastaId" class="fw-semibold"></span>
-                            </p>
-                            <p class="mb-1 text-dark">
-                                <strong>Nombre:</strong> <span id="modalCancelarActivaSubastaNombre" class="fw-semibold"></span>
+                                <strong>ID:</strong> <span id="modalCancelarSubastaId" class="fw-semibold"></span>
                             </p>
                             <p class="mb-0 text-dark">
-                                <strong>Pujas:</strong> <span id="modalCancelarActivaPujas" class="fw-semibold"></span>
+                                <strong>Nombre:</strong> <span id="modalCancelarSubastaNombre" class="fw-semibold"></span>
                             </p>
                         </div>
                         <div class="alert alert-warning border-0 small mb-0">
@@ -182,7 +233,7 @@
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
                         <i class="bi bi-x-lg me-1"></i>No cancelar
                     </button>
-                    <form id="cancelarActivaForm" method="post" class="d-inline">
+                    <form id="cancelarForm" method="post" class="d-inline">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="idEstadoSubasta" value="4" />
                         <button type="submit" class="btn btn-danger px-4 fw-semibold">
@@ -196,33 +247,44 @@
 
     @section Scripts {
         <script>
-            function handleCancelarActivaClick(button) {
+            function handlePublicarClick(button) {
                 const subastaId = button.getAttribute('data-subasta-id');
                 const subastaNombre = button.getAttribute('data-subasta-nombre');
-                const pujasCantidad = parseInt(button.getAttribute('data-pujas-cantidad'));
 
-                // Validar si tiene pujas
-                if (pujasCantidad > 0) {
-                    // Mostrar SweetAlert de error si tiene pujas
-                    Swal.fire({
-                        title: 'No se puede cancelar',
-                        text: `No se puede cancelar la subasta "${subastaNombre}" porque ya tiene ${pujasCantidad} puja(s) registrada(s).`,
-                        icon: 'error',
-                        confirmButtonText: 'Entendido',
-                        confirmButtonColor: '#dc3545'
-                    });
-                    return;
-                }
-
-                // Si no tiene pujas, mostrar modal de confirmación
-                document.getElementById('modalCancelarActivaSubastaId').textContent = subastaId;
-                document.getElementById('modalCancelarActivaSubastaNombre').textContent = subastaNombre;
-                document.getElementById('modalCancelarActivaPujas').textContent = pujasCantidad;
+                // Actualizar contenido del modal
+                document.getElementById('modalSubastaId').textContent = subastaId;
+                document.getElementById('modalSubastaNombre').textContent = subastaNombre;
 
                 // Configurar formulario
-                const cancelarForm = document.getElementById('cancelarActivaForm');
-                cancelarForm.action = '@Url.Action("ChangeEstado", "Subasta", new { returnTo = "IndexSA" })';
+                const publicarForm = document.getElementById('publicarForm');
+                publicarForm.action = '@Url.Action("ChangeEstado", "Subasta", new { returnTo = "IndexAdmin" })'; // ← CAMBIO AQUÍ
 
+                // Agregar campo hidden para el ID
+                let hiddenId = publicarForm.querySelector('input[name="id"]');
+                if (!hiddenId) {
+                    hiddenId = document.createElement('input');
+                    hiddenId.type = 'hidden';
+                    hiddenId.name = 'id';
+                    publicarForm.appendChild(hiddenId);
+                }
+                hiddenId.value = subastaId;
+
+                // Mostrar el modal
+                const publicarModal = new bootstrap.Modal(document.getElementById('publicarModal'));
+                publicarModal.show();
+            }
+
+            function handleCancelarClick(button) {
+                const subastaId = button.getAttribute('data-subasta-id');
+                const subastaNombre = button.getAttribute('data-subasta-nombre');
+
+                // Actualizar contenido del modal
+                document.getElementById('modalCancelarSubastaId').textContent = subastaId;
+                document.getElementById('modalCancelarSubastaNombre').textContent = subastaNombre;
+
+                // Configurar formulario
+                const cancelarForm = document.getElementById('cancelarForm');
+                cancelarForm.action = '@Url.Action("CancelarSubasta", "Subasta")'; // ← CAMBIO AQUÍ
 
                 // Agregar campo hidden para el ID
                 let hiddenId = cancelarForm.querySelector('input[name="id"]');
@@ -235,7 +297,7 @@
                 hiddenId.value = subastaId;
 
                 // Mostrar el modal
-                const cancelarModal = new bootstrap.Modal(document.getElementById('cancelarActivaModal'));
+                const cancelarModal = new bootstrap.Modal(document.getElementById('cancelarModal'));
                 cancelarModal.show();
             }
         </script>

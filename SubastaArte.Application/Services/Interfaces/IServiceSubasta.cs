@@ -13,5 +13,10 @@ namespace SubastaArte.Application.Services.Interfaces
         Task<ICollection<SubastaDTO>> ListAsync(int estadoId);
         Task<SubastaDTO> FindByIdAsync(int id);
         Task DeleteAsync(int id);
+        Task<int> AddAsync(SubastaDTO entity, string[] selectedObjetos);
+        Task UpdateAsync(int id, SubastaDTO entity, string[] selectedObjetos);
+        Task ChangeEstadoAsync(int idSubasta, int idEstadoSubasta);
+
+
     }
 }

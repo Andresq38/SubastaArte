@@ -33,15 +33,15 @@ namespace SubastaArte.Application.DTOs
 
         public List<CancelacionSubastaDTO> CancelacionSubasta { get; set; } = new();
 
-        public Usuario IdCreadorNavigation { get; set; } = new();
+        public UsuarioDTO IdCreadorNavigation { get; set; } = new();
 
         [DisplayName("Estado Subasta")]
-        public  EstadoSubasta IdEstadoSubastaNavigation { get; set; } = new();
+        public  EstadoSubastaDTO IdEstadoSubastaNavigation { get; set; } = new();
 
         [DisplayName("Imagen")]
-        public Objeto IdObjetoNavigation { get; set; } = new();
+        public ObjetoDTO IdObjetoNavigation { get; set; } = new();
 
-        public Usuario IdVendedorNavigation { get; set; } = new();
+        public UsuarioDTO IdVendedorNavigation { get; set; } = new();
 
         public List<PagoDTO> Pago { get; set; } = new();
 

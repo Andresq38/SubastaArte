@@ -1,0 +1,140 @@
+﻿@model SubastaArte.Application.DTOs.SubastaDTO
+
+@{
+    ViewData["Title"] = "Editar subasta";
+}
+
+<header class="mb-3">
+    <h1 class="h3 mb-0">Editar subasta</h1>
+    <p class="text-muted mb-0">Mantenimiento: edición de datos de subasta</p>
+</header>
+
+<form asp-action="Edit" method="post" asp-route-id="@Model.IdSubasta" class="row g-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input asp-for="IdSubasta" type="hidden" />
+
+    <div class="col-12">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input asp-for="Nombre" class="form-control bg-light" readonly />
+        <div class="form-text">El nombre de la subasta no se puede modificar.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="FechaInicio" class="form-label"></label>
+        <input asp-for="FechaInicio" class="form-control" type="datetime-local" />
+        <span asp-validation-for="FechaInicio" class="text-danger"></span>
+        <div class="form-text">Fecha y hora de inicio de la subasta.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="FechaCierre" class="form-label"></label>
+        <input asp-for="FechaCierre" class="form-control" type="datetime-local" />
+        <span asp-validation-for="FechaCierre" class="text-danger"></span>
+        <div class="form-text">Debe ser mayor a la fecha de inicio.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="PrecioBase" class="form-label"></label>
+        <div class="input-group">
+            <span class="input-group-text">₡</span>
+            <input asp-for="PrecioBase" class="form-control" type="number" step="0.01" min="0.01" />
+        </div>
+        <span asp-validation-for="PrecioBase" class="text-danger"></span>
+        <div class="form-text">Precio inicial de la subasta.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="IncrementoMinimo" class="form-label"></label>
+        <div class="input-group">
+            <span class="input-group-text">₡</span>
+            <input asp-for="IncrementoMinimo" class="form-control" type="number" step="0.01" min="0.01" />
+        </div>
+        <span asp-validation-for="IncrementoMinimo" class="text-danger"></span>
+        <div class="form-text">Incremento mínimo para pujas.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Objeto</label>
+        <input class="form-control bg-light" value="@Model.IdObjetoNavigation?.Nombre" readonly />
+        <div class="form-text">El objeto de la subasta no se puede cambiar.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Estado</label>
+        <input class="form-control bg-light" value="@Model.IdEstadoSubastaNavigation?.Nombre" readonly />
+        <div class="form-text">Estado actual de la subasta.</div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Usuario Creador</label>
+        <input class="form-control bg-light" value="@(Model.IdCreadorNavigation != null ? $"{Model.IdCreadorNavigation.Nombre} {Model.IdCreadorNavigation.Apellido1}" : "N/A")" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Usuario Vendedor</label>
+        <input class="form-control bg-light" value="@(Model.IdVendedorNavigation != null ? $"{Model.IdVendedorNavigation.Nombre} {Model.IdVendedorNavigation.Apellido1}" : "N/A")" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="PujasSubasta" class="form-label"></label>
+        <input asp-for="PujasSubasta" class="form-control bg-light" readonly />
+        <div class="form-text">Cantidad actual de pujas registradas.</div>
+    </div>
+
+    <div class="col-12">
+        <div class="alert alert-info border-0" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Información importante:</strong>
+            <ul class="mb-0 mt-2">
+                <li>Solo se pueden editar subastas que no han iniciado y no tienen pujas.</li>
+                <li>La fecha de cierre debe ser mayor a la fecha de inicio.</li>
+                <li>Los precios deben ser mayores a cero.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check2-circle"></i> Guardar cambios
+        </button>
+        <a asp-action="IndexAdmin" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Configurar fechas mínimas (similar al Create)
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaInicio = document.querySelector('input[name="FechaInicio"]');
+            const fechaCierre = document.querySelector('input[name="FechaCierre"]');
+
+            // Establecer fecha mínima como ahora
+            const now = new Date();
+            const nowString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+
+            if (fechaInicio) {
+                fechaInicio.min = nowString;
+
+                fechaInicio.addEventListener('change', function() {
+                    if (fechaCierre && this.value) {
+                        fechaCierre.min = this.value;
+                        if (fechaCierre.value && fechaCierre.value <= this.value) {
+                            fechaCierre.value = '';
+                        }
+                    }
+                });
+            }
+
+            if (fechaCierre) {
+                fechaCierre.min = nowString;
+            }
+        });
+    </script>
+}
+
+

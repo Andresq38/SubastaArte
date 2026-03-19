@@ -13,8 +13,11 @@ namespace SubastaArte.Infraestructure.Repository.Interfaces
         Task<Subasta> FindByIdAsync(int id);
         Task DeleteAsync(int id);
 
-        //Task<int> AddAsync(Objeto entity, string[] selectedCategorias);
-        //Task UpdateAsync(Subasta entity, string[] selectedCategorias);
+        Task<int> AddAsync(Subasta entity, string[] selectedObjetos);
+        Task UpdateAsync(Subasta entity, string[] selectedObjetos);
+        Task ChangeEstadoAsync(int idSubasta, int idEstadoSubasta);
+
+
         //Task<ICollection<Subasta>> GetObjetoByCategoria(int IdCategoria);
         //Task<ICollection<Subasta>> FindByNameAsync(string nombre);
     }
