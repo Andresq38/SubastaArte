@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,8 +16,10 @@ namespace SubastaArte.Application.DTOs
 
         public int IdObjeto { get; set; }
 
+        [DisplayName("Fecha Inicio")]
         public DateTime FechaInicio { get; set; }
 
+        [DisplayName("Fecha Cierre")]
         public DateTime FechaCierre { get; set; }
 
         public decimal PrecioBase { get; set; }

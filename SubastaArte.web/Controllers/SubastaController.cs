@@ -267,7 +267,7 @@ namespace SubastaArte.web.Controllers
         }
 
         // GET: SubastaController/Edit
-        public async Task<ActionResult> Edit(int id)
+        public async Task<ActionResult> Edit(int id, string? returnTo = null)
         {
             var dto = await _serviceSubasta.FindByIdAsync(id);
             if (dto == null)
@@ -277,15 +277,24 @@ namespace SubastaArte.web.Controllers
                     $"No existe una subasta con ID {id}",
                     SweetAlertMessageType.error
                 );
-                return RedirectToAction(nameof(IndexAdmin));
+
+                // Decidir a dónde regresar en caso de error
+                if (returnTo == "IndexSA")
+                    return RedirectToAction(nameof(IndexSA));
+                else
+                    return RedirectToAction(nameof(IndexAdmin));
             }
+
+            // Pasar el parámetro returnTo a la vista
+            ViewBag.ReturnTo = returnTo;
 
             return View(dto);
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(int id, SubastaDTO dto, string[] selectedObjetos)
+        public async Task<ActionResult> Edit(int id, SubastaDTO dto, string[] selectedObjetos, string? returnTo = null)
         {
             if (!ModelState.IsValid)
             {
@@ -300,6 +309,9 @@ namespace SubastaArte.web.Controllers
                     $"El formulario contiene errores:<br>{errores}",
                     SweetAlertMessageType.warning
                 );
+
+                // Mantener el parámetro returnTo en caso de error
+                ViewBag.ReturnTo = returnTo;
                 return View(dto);
             }
 
@@ -310,8 +322,14 @@ namespace SubastaArte.web.Controllers
                 $"La subasta {dto.Nombre} ha sido modificada exitosamente.",
                 SweetAlertMessageType.success
             );
-            return RedirectToAction(nameof(IndexAdmin));
+
+            // Decidir a dónde regresar basado en el parámetro
+            if (returnTo == "IndexSA")
+                return RedirectToAction(nameof(IndexSA));
+            else
+                return RedirectToAction(nameof(IndexAdmin));
         }
+
 
         public async Task<ActionResult> ChangeEstado(int id)
         {

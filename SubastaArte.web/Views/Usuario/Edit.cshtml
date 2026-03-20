@@ -17,26 +17,27 @@
     <div class="col-md-6">
         <label asp-for="Nombre" class="form-label"></label>
         <input asp-for="Nombre" class="form-control" autocomplete="off" />
-        <span asp-validation-for="Nombre" class="text-danger"></span>
+        <span id="nombre-custom-error" class="text-danger"></span>
     </div>
 
     <div class="col-md-6">
         <label asp-for="Apellido1" class="form-label"></label>
         <input asp-for="Apellido1" class="form-control" autocomplete="off" />
-        <span asp-validation-for="Apellido1" class="text-danger"></span>
+        <span id="apellido1-custom-error" class="text-danger"></span>
     </div>
 
     <div class="col-md-6">
         <label asp-for="Apellido2" class="form-label"></label>
         <input asp-for="Apellido2" class="form-control" autocomplete="off" />
-        <span asp-validation-for="Apellido2" class="text-danger"></span>
+        <span id="apellido2-custom-error" class="text-danger"></span>
     </div>
 
     <div class="col-md-6">
         <label asp-for="Email" class="form-label"></label>
         <input asp-for="Email" class="form-control" autocomplete="off" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+        <span id="email-custom-error" class="text-danger"></span>
     </div>
+
 
     <div class="col-md-6">
         <label class="form-label">Rol</label>
@@ -81,4 +82,81 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            let hasErrors = false;
+
+            // Validar nombre
+            const nombre = document.querySelector('input[name="Nombre"]');
+            const nombreError = document.getElementById('nombre-custom-error');
+            
+            if (!nombre.value.trim()) {
+                nombreError.textContent = 'El nombre es requerido';
+                nombreError.style.display = 'block';
+                hasErrors = true;
+            } else {
+                nombreError.style.display = 'none';
+            }
+
+            // Validar apellido1
+            const apellido1 = document.querySelector('input[name="Apellido1"]');
+            const apellido1Error = document.getElementById('apellido1-custom-error');
+            
+            if (!apellido1.value.trim()) {
+                apellido1Error.textContent = 'El primer apellido es requerido';
+                apellido1Error.style.display = 'block';
+                hasErrors = true;
+            } else {
+                apellido1Error.style.display = 'none';
+            }
+
+            // Validar apellido2
+            const apellido2 = document.querySelector('input[name="Apellido2"]');
+            const apellido2Error = document.getElementById('apellido2-custom-error');
+            
+            if (!apellido2.value.trim()) {
+                apellido2Error.textContent = 'El segundo apellido es requerido';
+                apellido2Error.style.display = 'block';
+                hasErrors = true;
+            } else {
+                apellido2Error.style.display = 'none';
+            }
+
+            // Validar email
+            const email = document.querySelector('input[name="Email"]');
+            const emailError = document.getElementById('email-custom-error');
+
+            if (!email.value.trim()) {
+                emailError.textContent = 'El correo electrónico es requerido';
+                emailError.style.display = 'block';
+                hasErrors = true;
+            } else {
+                emailError.style.display = 'none';
+            }
+
+            if (hasErrors) {
+                e.preventDefault();
+            }
+        });
+    </script>
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+

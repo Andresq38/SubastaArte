@@ -20,6 +20,7 @@ namespace SubastaArte.Application.DTOs
         [DisplayName("Descripcion Objeto")]
         public string Descripcion { get; set; } = string.Empty;
 
+
         [DisplayName("Condicion Objeto")]
         public string Condicion { get; set; } = string.Empty;
 

@@ -97,7 +97,16 @@
                                             <i class="bi bi-eye"></i><span class="d-none d-lg-inline ms-1">Detalle</span>
                                         </a>
 
-                                        @* Botón Cancelar (con validación de pujas) *@
+                                        @* Botón Editar (con validación de pujas) *@
+                                        <button type="button" class="btn btn-outline-primary px-3 py-2"
+                                                data-subasta-id="@item.IdSubasta"
+                                                data-subasta-nombre="@item.Nombre"
+                                                data-pujas-cantidad="@item.PujasSubasta"
+                                                onclick="handleEditarActivaClick(this)">
+                                            <i class="bi bi-pencil-square"></i><span class="d-none d-lg-inline ms-1">Editar</span>
+                                        </button>
+
+                                        @* Botón Cancelar (con validación de pujas) - SIN MODIFICAR *@
                                         <button type="button" class="btn btn-outline-danger px-3 py-2"
                                                 data-subasta-id="@item.IdSubasta"
                                                 data-subasta-nombre="@item.Nombre"
@@ -107,6 +116,7 @@
                                         </button>
                                     </div>
                                 </td>
+
                             </tr>
                         }
                     </tbody>
@@ -238,8 +248,34 @@
                 const cancelarModal = new bootstrap.Modal(document.getElementById('cancelarActivaModal'));
                 cancelarModal.show();
             }
+
+                 // NUEVA FUNCIÓN para editar
+                function handleEditarActivaClick(button) {
+                    const subastaId = button.getAttribute('data-subasta-id');
+                    const subastaNombre = button.getAttribute('data-subasta-nombre');
+                    const pujasCantidad = parseInt(button.getAttribute('data-pujas-cantidad'));
+
+                    // Validar si tiene pujas
+                    if (pujasCantidad > 0) {
+                        // Mostrar SweetAlert de error si tiene pujas
+                        Swal.fire({
+                            title: 'No se puede editar',
+                            text: `No se puede editar la subasta "${subastaNombre}" porque ya tiene ${pujasCantidad} puja(s) registrada(s).`,
+                            icon: 'error',
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: '#dc3545'
+                        });
+                        return;
+                    }
+
+                    // Si no tiene pujas, redirigir a Edit con parámetro returnTo
+                       const baseUrl = '@Url.Action("Edit", "Subasta")';
+                       window.location.href = `${baseUrl}/${subastaId}?returnTo=IndexSA`;
+        
+                }      
         </script>
-    }
+        
+      }
 
 
 </div>

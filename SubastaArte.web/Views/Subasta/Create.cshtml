@@ -17,38 +17,39 @@
     <div class="col-12">
         <label asp-for="Nombre" class="form-label"></label>
         <input asp-for="Nombre" class="form-control" autocomplete="off" placeholder="Ingrese el nombre de la subasta" />
-        <span asp-validation-for="Nombre" class="text-danger"></span>
+        <span id="nombre-custom-error" class="text-danger"></span>
     </div>
 
+
     <div class="col-12">
-        <label class="form-label">Objeto a subastar</label>
-        <select id="selectedObjetos"
-                name="selectedObjetos"
-                class="form-select">
-            <option value="">Seleccione un objeto</option>
-            @if (objetos != null)
+    <label class="form-label">Objeto a subastar</label>
+    <select id="selectedObjetos"
+            name="selectedObjetos"
+            class="form-select">
+        <option value="">Seleccione un objeto</option>
+        @if (objetos != null)
+        {
+            foreach (SelectListItem item in objetos)
             {
-                foreach (SelectListItem item in objetos)
-                {
-                    <option value="@item.Value">@item.Text</option>
-                }
+                <option value="@item.Value">@item.Text</option>
             }
-        </select>
-        <span id="selectedObjetos-error" class="text-danger"></span>
-        <div class="form-text">Solo se muestran objetos activos sin subasta activa.</div>
-    </div>
+        }
+    </select>
+    <span id="selectedObjetos-error" class="text-danger"></span>
+    <div class="form-text">Solo se muestran objetos activos sin subasta activa.</div>
+</div>
 
     <div class="col-md-6">
         <label asp-for="FechaInicio" class="form-label"></label>
         <input asp-for="FechaInicio" class="form-control" type="datetime-local" />
-        <span asp-validation-for="FechaInicio" class="text-danger"></span>
+        <span id="fechaInicio-custom-error" class="text-danger"></span>
         <div class="form-text">Fecha y hora de inicio de la subasta.</div>
     </div>
 
     <div class="col-md-6">
         <label asp-for="FechaCierre" class="form-label"></label>
         <input asp-for="FechaCierre" class="form-control" type="datetime-local" />
-        <span asp-validation-for="FechaCierre" class="text-danger"></span>
+        <span id="fechaCierre-custom-error" class="text-danger"></span>
         <div class="form-text">Debe ser mayor a la fecha de inicio.</div>
     </div>
 
@@ -56,7 +57,7 @@
         <label asp-for="PrecioBase" class="form-label"></label>
         <div class="input-group">
             <span class="input-group-text">₡</span>
-            <input asp-for="PrecioBase" class="form-control" type="number" step="0.01" min="0.01" placeholder="0.00" />
+            <input asp-for="PrecioBase" class="form-control" type="number" step="1" min="0,01" placeholder="0" />
         </div>
         <span asp-validation-for="PrecioBase" class="text-danger"></span>
         <div class="form-text">Precio inicial de la subasta (debe ser mayor a cero).</div>
@@ -66,7 +67,7 @@
         <label asp-for="IncrementoMinimo" class="form-label"></label>
         <div class="input-group">
             <span class="input-group-text">₡</span>
-            <input asp-for="IncrementoMinimo" class="form-control" type="number" step="0.01" min="0.01" placeholder="0.00" />
+            <input asp-for="IncrementoMinimo" class="form-control" type="number" step="1" min="0,01" placeholder="0" />
         </div>
         <span asp-validation-for="IncrementoMinimo" class="text-danger"></span>
         <div class="form-text">Monto mínimo para incrementar pujas (debe ser mayor a cero).</div>
@@ -81,21 +82,9 @@
     <div class="col-md-6">
         <label class="form-label">Usuario creador</label>
         <input class="form-control" value="@(usuarioActual != null ? $"{usuarioActual.Nombre} {usuarioActual.Apellido1} {usuarioActual.Apellido2}" : "Usuario no encontrado")" readonly />
-        <div class="form-text">Usuario que crea la subasta (asignado automáticamente).</div>
+        <div class="form-text">Usuario que crea la subasta.</div>
     </div>
 
-    <div class="col-12">
-        <div class="alert alert-info border-0" role="alert">
-            <i class="bi bi-info-circle me-2"></i>
-            <strong>Información importante:</strong>
-            <ul class="mb-0 mt-2">
-                <li>El usuario vendedor se asignará automáticamente según el objeto seleccionado.</li>
-                <li>La subasta se creará en estado "No activa" y deberá ser activada posteriormente.</li>
-                <li>Solo se pueden subastar objetos que estén activos y sin otra subasta activa.</li>
-                <li>La fecha de cierre debe ser mayor a la fecha de inicio.</li>
-            </ul>
-        </div>
-    </div>
 
     <div class="col-12 d-flex gap-2">
         <button type="submit" class="btn btn-primary">
@@ -107,63 +96,125 @@
     </div>
 </form>
 
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        // Configurar fechas mínimas
-        document.addEventListener('DOMContentLoaded', function() {
-            const fechaInicio = document.querySelector('input[name="FechaInicio"]');
-            const fechaCierre = document.querySelector('input[name="FechaCierre"]');
-
-            // Establecer fecha mínima como ahora
+        $(document).ready(function() {
+            // CONFIGURAR FECHAS CORRECTAMENTE
             const now = new Date();
-            const nowString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            const today = now.toISOString().slice(0, 16);
 
-            if (fechaInicio) {
-                fechaInicio.min = nowString;
+            const fechaInicioInput = $('input[name="FechaInicio"]');
+            const fechaCierreInput = $('input[name="FechaCierre"]');
 
-                // Cuando cambia fecha inicio, actualizar mínimo de fecha cierre
-                fechaInicio.addEventListener('change', function() {
-                    if (fechaCierre && this.value) {
-                        fechaCierre.min = this.value;
+            // Establecer fecha de hoy como valor por defecto Y bloquear fechas pasadas
+            fechaInicioInput.val(today).attr('min', today);
+            fechaCierreInput.attr('min', today);
 
-                        // Si fecha cierre es menor que inicio, limpiarla
-                        if (fechaCierre.value && fechaCierre.value <= this.value) {
-                            fechaCierre.value = '';
-                        }
+            // Cuando cambie fecha inicio, actualizar mínimo de fecha cierre
+            fechaInicioInput.on('change', function() {
+                const fechaInicioValue = $(this).val();
+                if (fechaInicioValue) {
+                    fechaCierreInput.attr('min', fechaInicioValue);
+                    if (fechaCierreInput.val() && fechaCierreInput.val() <= fechaInicioValue) {
+                        fechaCierreInput.val('');
                     }
-                });
-            }
+                }
+            });
 
-            if (fechaCierre) {
-                fechaCierre.min = nowString;
-            }
+            // DESHABILITAR validación nativa del HTML5 para evitar mensajes en inglés
+            $('form')[0].setAttribute('novalidate', '');
 
-            // Validación de precios en tiempo real
-            const precioBase = document.querySelector('input[name="PrecioBase"]');
-            const incrementoMinimo = document.querySelector('input[name="IncrementoMinimo"]');
+            // VALIDACIONES COMPLETAS EN SUBMIT
+            $('form').on('submit', function(e) {
+                let isValid = true;
 
-            if (precioBase) {
-                precioBase.addEventListener('input', function() {
-                    if (this.value && parseFloat(this.value) <= 0) {
-                        this.setCustomValidity('El precio base debe ser mayor a cero');
-                    } else {
-                        this.setCustomValidity('');
+                // Limpiar errores anteriores
+                $('#selectedObjetos-error, #fechaInicio-custom-error, #fechaCierre-custom-error, #nombre-custom-error, #precio-custom-error, #incremento-custom-error').text('').hide();
+
+                // 1. VALIDAR NOMBRE
+                const nombre = $('input[name="Nombre"]').val();
+                if (!nombre || nombre.trim() === '') {
+                    $('#nombre-custom-error').text('El nombre de la subasta es requerido').show();
+                    isValid = false;
+                }
+
+                // 2. VALIDAR OBJETO
+                const objeto = $('#selectedObjetos').val();
+                if (!objeto) {
+                    $('#selectedObjetos-error').text('Debe seleccionar un objeto para la subasta').show();
+                    isValid = false;
+                }
+
+                // 3. VALIDAR PRECIO BASE
+                const precioBase = parseFloat($('input[name="PrecioBase"]').val());
+                if (!precioBase || precioBase <= 0) {
+                    if (!$('#precio-custom-error').length) {
+                        $('input[name="PrecioBase"]').closest('.input-group').after('<span id="precio-custom-error" class="text-danger"></span>');
                     }
-                });
-            }
+                    $('#precio-custom-error').text('El precio base debe ser mayor a cero').show();
+                    isValid = false;
+                }
 
-            if (incrementoMinimo) {
-                incrementoMinimo.addEventListener('input', function() {
-                    if (this.value && parseFloat(this.value) <= 0) {
-                        this.setCustomValidity('El incremento mínimo debe ser mayor a cero');
-                    } else {
-                        this.setCustomValidity('');
+                // 4. VALIDAR INCREMENTO MÍNIMO
+                const incremento = parseFloat($('input[name="IncrementoMinimo"]').val());
+                if (!incremento || incremento <= 0) {
+                    if (!$('#incremento-custom-error').length) {
+                        $('input[name="IncrementoMinimo"]').closest('.input-group').after('<span id="incremento-custom-error" class="text-danger"></span>');
                     }
-                });
-            }
+                    $('#incremento-custom-error').text('El incremento mínimo debe ser mayor a cero').show();
+                    isValid = false;
+                }
+
+                // 5. VALIDAR FECHA INICIO
+                const fechaInicio = fechaInicioInput.val();
+                if (!fechaInicio) {
+                    $('#fechaInicio-custom-error').text('La fecha de inicio es requerida').show();
+                    isValid = false;
+                } else {
+                    const fechaInicioDate = new Date(fechaInicio);
+                    const nowCheck = new Date();
+                    if (fechaInicioDate < nowCheck) {
+                        $('#fechaInicio-custom-error').text('La fecha de inicio debe ser mayor a la fecha actual').show();
+                        isValid = false;
+                    }
+                }
+
+                // 6. VALIDAR FECHA CIERRE
+                const fechaCierre = fechaCierreInput.val();
+                if (!fechaCierre) {
+                    $('#fechaCierre-custom-error').text('La fecha de cierre es requerida').show();
+                    isValid = false;
+                } else if (fechaInicio) {
+                    const fechaInicioDate = new Date(fechaInicio);
+                    const fechaCierreDate = new Date(fechaCierre);
+                    if (fechaCierreDate <= fechaInicioDate) {
+                        $('#fechaCierre-custom-error').text('La fecha de cierre debe ser mayor a la fecha de inicio').show();
+                        isValid = false;
+                    }
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
         });
     </script>
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
