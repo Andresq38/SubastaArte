@@ -16,7 +16,7 @@
 
     <input asp-for="IdObjeto" type="hidden" />
     <input asp-for="IdVendedor" type="hidden" />
-    <input asp-for="IdEstadoObjeto" type="hidden" />
+@*     <input asp-for="IdEstadoObjeto" type="hidden" /> *@
 
     <div class="col-12">
         <label asp-for="Nombre" class="form-label"></label>
@@ -42,9 +42,10 @@
     </div>
 
     <div class="col-md-6">
-        <label class="form-label">Estado inicial</label>
-        <input class="form-control" value="@(Model.IdEstadoObjetoNavigation?.Nombre ?? "Activo")" readonly />
+        <label asp-for="IdEstadoObjeto" class="form-label">Estado</label>
+        <select asp-for="IdEstadoObjeto" class="form-select" asp-items="ViewBag.ListEstadosObjeto"></select>
     </div>
+
 
     <div class="col-md-6">
         <label class="form-label">Usuario vendedor</label>
@@ -155,7 +156,7 @@
             });
         });
 
-        // Bootstrap Multiselect (asegúrate de tener la librería incluida)
+        // Bootstrap Multiselect
         $(document).ready(function () {
             var $select = $('#selectedCategorias');
             if ($.fn.multiselect) {
@@ -187,7 +188,8 @@
 
         
         document.querySelector('form').addEventListener('submit', function (e) {
-               // Validación de imágenes - LÓGICA PARA EDIT
+             let hasErrors = false;
+               // Validación de imágenes
                 const imageInput = document.getElementById('imagenes');
                 const imageError = document.getElementById('imagen-error');
 
@@ -263,11 +265,6 @@
                 $('#condicion-custom-error').text('Debe seleccionar una condición del objeto').show();
                 hasErrors = true;
             }
-
-
-
-
-
 
             if (hasErrors) {
                 e.preventDefault();

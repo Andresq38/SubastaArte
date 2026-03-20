@@ -41,7 +41,7 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                 .Include(o => o.Subasta)
                     .ThenInclude(s => s.IdEstadoSubastaNavigation)
                 .Include(o => o.Foto) // Incluir imágenes para eliminarlas también
-                .Include(o => o.IdCategoria) // ¡AGREGAR ESTA LÍNEA! - Incluir categorías
+                .Include(o => o.IdCategoria) // Incluir categorías
                 .FirstOrDefaultAsync(o => o.IdObjeto == id);
 
             if (objeto == null)
@@ -56,21 +56,19 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                     "No se puede eliminar el objeto porque pertenece a una subasta activa o finalizada.");
             }
 
-            // Si llegamos aquí, el objeto SÍ se puede eliminar
-
-            // 1. LIMPIAR RELACIONES CON CATEGORÍAS (tabla ObjetoCategoria)
+            // Limpiar relaciones con categorias
             objeto.IdCategoria.Clear();
 
-            // 2. Eliminar todas las imágenes asociadas (cascade delete debería manejar esto, pero por seguridad)
+            // Eliminar todas las imágenes asociadas
             if (objeto.Foto != null && objeto.Foto.Any())
             {
                 _context.Imagen.RemoveRange(objeto.Foto);
             }
 
-            // 3. Eliminar el objeto
+            // Eliminar el objeto
             _context.Objeto.Remove(objeto);
 
-            // 4. Guardar cambios
+            // Guardar cambios
             await _context.SaveChangesAsync();
         }
 
@@ -85,7 +83,6 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                 return;
             }
 
-            // Parse seguro
             var ids = selectedCategorias
                 .Select(x => int.TryParse(x, out var n) ? n : (int?)null)
                 .Where(x => x.HasValue)
@@ -114,7 +111,7 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
 
             foreach (var imagen in objetoToUpdate.Foto)
             {
-                // Asocia la imagen al objeto (relación inversa)
+                // Asocia la imagen al objeto
                 imagen.IdObjetoNavigation = objetoToUpdate;
             }
         }
@@ -176,16 +173,16 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
             if (enSubastaActiva)
                 throw new InvalidOperationException("No se puede editar el objeto porque está en una subasta activa.");
 
-            // *** ACTUALIZAR PROPIEDADES BÁSICAS DEL OBJETO ***
             objetoDb.Nombre = entity.Nombre;
             objetoDb.Descripcion = entity.Descripcion;
             objetoDb.Condicion = entity.Condicion;
-            objetoDb.FechaRegistro = DateTime.Now; // <-- AGREGAR ESTA LÍNEA
+            objetoDb.FechaRegistro = DateTime.Now;
+            objetoDb.IdEstadoObjeto = entity.IdEstadoObjeto;
+
 
             // Actualiza categorías
             await ApplyCategoriasAsync(objetoDb, selectedCategorias);
 
-            // Resto del código igual...
             var fotos = entity.Foto?.ToList() ?? new List<Imagen>();
 
             var idsAConservar = fotos

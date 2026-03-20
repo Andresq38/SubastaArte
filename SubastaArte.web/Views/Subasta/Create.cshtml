@@ -124,14 +124,11 @@
                 }
             });
 
-            // DESHABILITAR validación nativa del HTML5 para evitar mensajes en inglés
             $('form')[0].setAttribute('novalidate', '');
 
-            // VALIDACIONES COMPLETAS EN SUBMIT
             $('form').on('submit', function(e) {
                 let isValid = true;
 
-                // Limpiar errores anteriores
                 $('#selectedObjetos-error, #fechaInicio-custom-error, #fechaCierre-custom-error, #nombre-custom-error, #precio-custom-error, #incremento-custom-error').text('').hide();
 
                 // 1. VALIDAR NOMBRE

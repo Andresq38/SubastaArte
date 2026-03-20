@@ -103,7 +103,7 @@
                                                 data-subasta-id="@item.IdSubasta"
                                                 data-subasta-nombre="@item.Nombre"
                                                 onclick="handlePublicarClick(this)">
-                                            <i class="bi bi-broadcast"></i><span class="d-none d-lg-inline ms-1">Publicar</span>
+                                            <i class="bi-eye-fill"></i><span class="d-none d-lg-inline ms-1">Publicar</span>
                                         </button>
 
                                         @* Botón Cancelar (con confirmación) *@
@@ -257,7 +257,7 @@
 
                 // Configurar formulario
                 const publicarForm = document.getElementById('publicarForm');
-                publicarForm.action = '@Url.Action("ChangeEstado", "Subasta", new { returnTo = "IndexAdmin" })'; // ← CAMBIO AQUÍ
+                publicarForm.action = '@Url.Action("ChangeEstado", "Subasta", new { returnTo = "IndexAdmin" })';
 
                 // Agregar campo hidden para el ID
                 let hiddenId = publicarForm.querySelector('input[name="id"]');
@@ -284,7 +284,7 @@
 
                 // Configurar formulario
                 const cancelarForm = document.getElementById('cancelarForm');
-                cancelarForm.action = '@Url.Action("CancelarSubasta", "Subasta")'; // ← CAMBIO AQUÍ
+                cancelarForm.action = '@Url.Action("CancelarSubasta", "Subasta")';
 
                 // Agregar campo hidden para el ID
                 let hiddenId = cancelarForm.querySelector('input[name="id"]');

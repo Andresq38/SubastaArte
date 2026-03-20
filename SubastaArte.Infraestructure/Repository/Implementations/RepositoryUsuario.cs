@@ -57,8 +57,6 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
             usuario.Apellido2 = entity.Apellido2;
             usuario.Email = entity.Email;
 
-            // No se modifica: Rol, FechaRegistro, EstadoUsuario
-
             await _context.SaveChangesAsync();
         }
         public async Task ChangeEstadoAsync(int idUsuario, int idEstadoUsuario)

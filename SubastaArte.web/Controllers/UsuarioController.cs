@@ -84,7 +84,6 @@ namespace SubastaArte.web.Controllers
                 return RedirectToAction(nameof(Details));
             }
 
-            // Puedes mostrar la vista para elegir el nuevo estado (activo/inactivo)
             return View(dto);
         }
 
@@ -130,7 +129,7 @@ namespace SubastaArte.web.Controllers
                     "Debe seleccionar un estado válido.",
                     SweetAlertMessageType.warning
                 );
-                // Puedes volver a cargar el usuario para mostrar la vista
+
                 var dto = await _serviceUsuario.FindByIdAsync(id);
                 return View(dto);
             }

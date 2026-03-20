@@ -15,7 +15,7 @@ namespace SubastaArte.Application.Profiles
         {
             // ENTIDAD → DTO (MOSTRAR)
             CreateMap<Subasta, SubastaDTO>()
-                // Incluir navegaciones para mostrar
+                // Incluir Datos para mostrar
                 .ForMember(d => d.IdCreadorNavigation, o => o.MapFrom(s => s.IdCreadorNavigation))
                 .ForMember(d => d.IdVendedorNavigation, o => o.MapFrom(s => s.IdVendedorNavigation))
                 .ForMember(d => d.IdObjetoNavigation, o => o.MapFrom(s => s.IdObjetoNavigation))
@@ -23,7 +23,6 @@ namespace SubastaArte.Application.Profiles
 
             // DTO → ENTIDAD (CREAR / EDITAR)  
             CreateMap<SubastaDTO, Subasta>()
-                // BLOQUEAR navegaciones en dirección DTO → Entidad
                 .ForMember(dest => dest.IdCreadorNavigation, orig => orig.Ignore())
                 .ForMember(dest => dest.IdVendedorNavigation, orig => orig.Ignore())
                 .ForMember(dest => dest.IdObjetoNavigation, orig => orig.Ignore())

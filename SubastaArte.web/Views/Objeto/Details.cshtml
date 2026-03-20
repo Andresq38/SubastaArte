@@ -107,8 +107,14 @@
                            @Model.Condicion
                         </span> *@
 
-                        <span class="badge text-bg-success">
-                            <i class="bi bi-check-lg me-1"></i>
+                        @{
+                            var esActivo = Model.IdEstadoObjeto == 1;
+                            var colorEstado = esActivo ? "text-bg-success" : "text-bg-danger";
+                            var iconoEstado = esActivo ? "bi-check-lg" : "bi-x-lg";
+                        }
+
+                        <span class="badge @colorEstado">
+                            <i class="@iconoEstado me-1"></i>
                             @Model.IdEstadoObjetoNavigation.Nombre
                         </span>
 

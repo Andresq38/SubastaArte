@@ -61,8 +61,6 @@ namespace SubastaArte.Application.Services.Implementations
         {
             var list = await _repository.ListAsync(estadoId);
 
-            //var collection = _mapper.Map<ICollection<SubastaDTO>>(list);
-
             // Cantidad de pujas por subasta / Cambiar Nombres de variables
             var collection = list.Select(s =>
             {
@@ -76,7 +74,7 @@ namespace SubastaArte.Application.Services.Implementations
 
         public async Task UpdateAsync(int id, SubastaDTO dto, string[] selectedObjetos)
         {
-            // Trae la subasta original (trackeada)
+            // Trae la subasta original
             var entity = await _repository.FindByIdAsync(id);
             if (entity == null)
                 throw new Exception("Subasta no encontrada");
@@ -86,8 +84,6 @@ namespace SubastaArte.Application.Services.Implementations
             entity.FechaCierre = dto.FechaCierre;
             entity.PrecioBase = dto.PrecioBase;
             entity.IncrementoMinimo = dto.IncrementoMinimo;
-
-            // No se modifica: Objeto, Creador, Vendedor, Estado, etc.
 
             await _repository.UpdateAsync(entity, selectedObjetos);
         }

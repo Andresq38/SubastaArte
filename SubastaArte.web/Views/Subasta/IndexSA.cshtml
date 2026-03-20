@@ -106,7 +106,7 @@
                                             <i class="bi bi-pencil-square"></i><span class="d-none d-lg-inline ms-1">Editar</span>
                                         </button>
 
-                                        @* Botón Cancelar (con validación de pujas) - SIN MODIFICAR *@
+                                        @* Botón Cancelar (con validación de pujas) *@
                                         <button type="button" class="btn btn-outline-danger px-3 py-2"
                                                 data-subasta-id="@item.IdSubasta"
                                                 data-subasta-nombre="@item.Nombre"
@@ -249,7 +249,7 @@
                 cancelarModal.show();
             }
 
-                 // NUEVA FUNCIÓN para editar
+                 // FUNCIÓN para editar
                 function handleEditarActivaClick(button) {
                     const subastaId = button.getAttribute('data-subasta-id');
                     const subastaNombre = button.getAttribute('data-subasta-nombre');
@@ -268,7 +268,7 @@
                         return;
                     }
 
-                    // Si no tiene pujas, redirigir a Edit con parámetro returnTo
+                    // Si no tiene pujas, redirigir a Edit
                        const baseUrl = '@Url.Action("Edit", "Subasta")';
                        window.location.href = `${baseUrl}/${subastaId}?returnTo=IndexSA`;
         

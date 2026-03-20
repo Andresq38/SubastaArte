@@ -137,13 +137,13 @@ namespace SubastaArte.web.Controllers
         // -------------------------
         private async Task LoadCombosAsync(string? selectedObjetoId = null)
         {
-            // Objetos disponibles para subasta (activos y sin subasta activa)
+            // Objetos disponibles para subasta 
             var objetos = await _serviceObjeto.ListAsync();
 
             // Filtrar objetos activos y sin subasta activa
             var objetosDisponibles = objetos
-                .Where(o => o.IdEstadoObjeto == 1) // Solo activos
-                .Where(o => !o.Subasta.Any(s => s.IdEstadoSubasta == 1)) // Sin subasta activa -- ********** Preguntar si se deberia poder agregar objetos con subastas finalizadas o no  **********
+                .Where(o => o.IdEstadoObjeto == 1) 
+                .Where(o => !o.Subasta.Any(s => s.IdEstadoSubasta == 1)) 
                 .ToList();
 
             ViewBag.ListObjetos = new SelectList(
@@ -161,7 +161,7 @@ namespace SubastaArte.web.Controllers
         public async Task<ActionResult> Create()
         {
             await LoadCombosAsync();
-            // Cargar el usuario actual (ID 2) - simula usuario logueado
+            // Cargar el usuario actual (ID 2)
             var usuarioActual = await _serviceUsuario.FindByIdAsync(2);
             ViewBag.UsuarioActual = usuarioActual;
             return View(new SubastaDTO());
@@ -254,7 +254,7 @@ namespace SubastaArte.web.Controllers
 
             // Asignar valores automáticos
             dto.IdCreador = 2; // Simula el usuario actual como creador
-            dto.IdEstadoSubasta = 3; // Estado inicial: No activa (predefinido, no editable)
+            dto.IdEstadoSubasta = 3; // Estado inicial: No activa
 
             await _serviceSubasta.AddAsync(dto, selectedObjetos);
 
@@ -285,7 +285,7 @@ namespace SubastaArte.web.Controllers
                     return RedirectToAction(nameof(IndexAdmin));
             }
 
-            // Pasar el parámetro returnTo a la vista
+
             ViewBag.ReturnTo = returnTo;
 
             return View(dto);
@@ -310,7 +310,7 @@ namespace SubastaArte.web.Controllers
                     SweetAlertMessageType.warning
                 );
 
-                // Mantener el parámetro returnTo en caso de error
+
                 ViewBag.ReturnTo = returnTo;
                 return View(dto);
             }
@@ -344,7 +344,7 @@ namespace SubastaArte.web.Controllers
                 return RedirectToAction(nameof(IndexAdmin));
             }
 
-            // Mostrar la vista para elegir el nuevo estado
+
             return View(dto);
         }
 

@@ -59,7 +59,7 @@ namespace SubastaArte.Application.Services.Implementations
 
         public async Task UpdateAsync(int id, UsuarioDTO dto)
         {
-            // Trae el usuario original (trackeado)
+            // Trae el usuario original
             var entity = await _repository.FindByIdAsync(id);
             if (entity == null)
                 throw new Exception("Usuario no encontrado");
@@ -70,7 +70,6 @@ namespace SubastaArte.Application.Services.Implementations
             entity.Apellido2 = dto.Apellido2;
             entity.Email = dto.Email;
 
-            // No se modifica: Rol, FechaRegistro, EstadoUsuario
 
             await _repository.UpdateAsync(entity);
         }

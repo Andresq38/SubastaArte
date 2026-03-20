@@ -78,7 +78,7 @@ namespace SubastaArte.Application.Services.Implementations
                 Condicion = dto.Condicion,
                 IdEstadoObjeto = dto.IdEstadoObjeto,
                 IdVendedor = dto.IdVendedor
-                // NO asignar FechaRegistro - se actualiza en el repository
+
             };
 
             // Mapear imágenes correctamente

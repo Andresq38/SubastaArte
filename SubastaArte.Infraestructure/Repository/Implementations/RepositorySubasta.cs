@@ -29,7 +29,7 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                 return;
             }
 
-            // Parse seguro - tomar el primer objeto seleccionado
+            // tomar el primer objeto seleccionado
             var id = int.TryParse(selectedObjetos[0], out var n) ? n : (int?)null;
 
             if (!id.HasValue || id.Value <= 0)
@@ -57,8 +57,6 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
 
         public async Task<int> AddAsync(Subasta entity, string[] selectedObjetos)
         {
-            // Asignar estado inicial: No activa
-            //entity.IdEstadoSubasta = 3;  Estado inicial: No activa
             
             // Aplicar objeto a la subasta
             await ApplyObjetoAsync(entity, selectedObjetos);

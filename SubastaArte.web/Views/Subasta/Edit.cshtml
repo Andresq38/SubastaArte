@@ -13,7 +13,6 @@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <input asp-for="IdSubasta" type="hidden" />
-    @* Agregar campo hidden para mantener returnTo *@
     @if (ViewBag.ReturnTo != null)
     {
         <input type="hidden" name="returnTo" value="@ViewBag.ReturnTo" />
@@ -91,7 +90,6 @@
             <i class="bi bi-check2-circle"></i> Guardar cambios
         </button>
 
-        @* Botón Volver dinámico basado en returnTo *@
         @if (ViewBag.ReturnTo == "IndexSA")
         {
             <a asp-action="IndexSA" class="btn btn-outline-secondary">
@@ -112,7 +110,6 @@
 
     <script>
         $(document).ready(function() {
-            // CONFIGURAR FECHAS CORRECTAMENTE
             const now = new Date();
             const today = now.toISOString().slice(0, 16);
 
@@ -134,14 +131,11 @@
                 }
             });
 
-            // DESHABILITAR validación nativa del HTML5 para evitar mensajes en inglés
             $('form')[0].setAttribute('novalidate', '');
 
-            // VALIDACIONES COMPLETAS EN SUBMIT
             $('form').on('submit', function(e) {
                 let isValid = true;
 
-                // Limpiar errores anteriores
                 $('#selectedObjetos-error, #fechaInicio-custom-error, #fechaCierre-custom-error, #nombre-custom-error, #precio-custom-error, #incremento-custom-error').text('').hide();
 
 
