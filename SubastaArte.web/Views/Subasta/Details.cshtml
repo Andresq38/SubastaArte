@@ -1,7 +1,18 @@
 ﻿@model SubastaArte.Application.DTOs.SubastaDTO
+@using System.Globalization
 
 @{
     ViewData["Title"] = "Detalle de la Subastas Activas";
+
+    var historialPujas = ViewBag.HistorialPujas as ICollection<SubastaArte.Application.DTOs.PujaDTO>
+        ?? new List<SubastaArte.Application.DTOs.PujaDTO>();
+
+    var pujaLider = ViewBag.PujaLider as SubastaArte.Application.DTOs.PujaDTO;
+    var listUsuariosPuja = ViewBag.ListUsuariosPuja as SelectList;
+
+    var montoMinimoPuja = pujaLider == null
+        ? Model.PrecioBase
+        : pujaLider.Monto + Model.IncrementoMinimo;
 }
 
 <nav class="mb-3">
@@ -31,38 +42,23 @@
 
 <article class="card shadow-sm border-0 overflow-hidden">
     <div class="row g-0">
-
-        <!-- Imagen / portada -->
         <div class="col-12 col-lg-5 bg-body-tertiary p-3">
             @if (Model.IdObjetoNavigation.Foto != null && Model.IdObjetoNavigation.Foto.Any())
             {
                 <div id="carouselSubasta" class="carousel slide carousel-dark" data-bs-ride="carousel">
                     <div class="carousel-inner text-center">
-
                         @{
                             var primera = true;
                         }
 
                         @foreach (var img in Model.IdObjetoNavigation.Foto)
                         {
-                            @* Una forma de ver imagenes *@
-                            @*  <div class="carousel-item @(primera ? "active" : "")">
-                                <img class="w-100 rounded"
-                                     style="max-height:500px; object-fit:cover;"
-                                     src="data:image/jpeg;base64,@Convert.ToBase64String(img.Foto)"
-                                     alt="Imagen de @Model.Nombre"
-                                     loading="lazy" />
-                            </div> *@
-
-                            @* Otra forma de ver imagenes *@
                             <div class="carousel-item @(primera ? "active" : "") text-center">
-
                                 <img class="img-fluid rounded"
                                      style="max-height:500px; object-fit:contain; background-color:#f8f9fa;"
                                      src="data:image/jpeg;base64,@Convert.ToBase64String(img.Foto)"
                                      alt="Imagen de @Model.Nombre"
                                      loading="lazy" />
-
                             </div>
 
                             primera = false;
@@ -80,95 +76,110 @@
             }
         </div>
 
-        <!-- Contenido -->
         <div class="col-12 col-lg-7">
             <div class="card-body p-4">
-
                 <header class="mb-3">
-                    <h2 class="h4 fw-semibold mb-1">@Model.Nombre</h2>
-
-                    <div>
-                        <!-- Condición -->
-                        <span class="badge text-bg-light mb-2">
-                            <i>Condicion:</i>
-                        </span>
-                        <span class="badge text-bg-light mb-2">
-                            <i class="bi bi-award me-1"></i>
-                            @Model.IdObjetoNavigation.Condicion
-                        </span>
-
-                        <!-- Categorías -->
-                        <div class="d-flex flex-wrap gap-2 mt-1">
-                            <span class="badge text-bg-light">
-                                <i>Categorias:</i>
-                            </span>
-                            @if (Model.IdObjetoNavigation.IdCategoria != null
-                            && Model.IdObjetoNavigation.IdCategoria.Any())
-                            {
-                                foreach (var c in Model.IdObjetoNavigation.IdCategoria)
-                                {
-
-                                    <span class="badge text-bg-light">
-                                        <i class="bi bi-tag me-1"></i>
-                                        @c.Nombre
-                                    </span>
-                                }
-                            }
-                            else
-                            {
-                                <span class="text-muted">Sin categorías</span>
-                            }
-                        </div>
-                    </div>
+                    <h2 id="nombre-subasta" class="h4 fw-semibold mb-1">@Model.Nombre</h2>
+                    <p class="text-muted mb-2">@Model.IdObjetoNavigation.Descripcion</p>
                 </header>
 
                 <hr class="my-3" />
 
-                <!-- Datos clave -->
                 <dl class="row mb-0">
-                    <dt class="col-12 col-md-4 text-muted">Fecha Inicio</dt>
+                    <dt class="col-12 col-md-4 text-muted">Vendedor</dt>
                     <dd class="col-12 col-md-8">
-                        @Model.FechaInicio
+                        @Model.IdVendedorNavigation.Nombre @Model.IdVendedorNavigation.Apellido1 @Model.IdVendedorNavigation.Apellido2
                     </dd>
 
+                    <dt class="col-12 col-md-4 text-muted">Fecha Inicio</dt>
+                    <dd class="col-12 col-md-8">@Model.FechaInicio</dd>
+
                     <dt class="col-12 col-md-4 text-muted">Fecha Cierre</dt>
+                    <dd class="col-12 col-md-8">@Model.FechaCierre</dd>
+
+                    <dt class="col-12 col-md-4 text-muted">Tiempo restante</dt>
                     <dd class="col-12 col-md-8">
-                        @Model.FechaCierre
+                        <span id="contador-tiempo"
+                              class="fw-semibold text-primary"
+                              data-fecha-cierre="@Model.FechaCierre.ToString("yyyy-MM-ddTHH:mm:ss")">
+                            --:--:--
+                        </span>
                     </dd>
 
                     <dt class="col-12 col-md-4 text-muted">Precio Base</dt>
-                    <dd class="col-12 col-md-8">
-                        @Model.PrecioBase.ToString("₡#,##0.00")
-                    </dd>
+                    <dd class="col-12 col-md-8">@Model.PrecioBase.ToString("₡#,##0.00")</dd>
 
                     <dt class="col-12 col-md-4 text-muted">Incremento Minimo</dt>
-                    <dd class="col-12 col-md-8">
-                        @(Model.IncrementoMinimo.ToString("₡#,##0.00"))
-                    </dd>
+                    <dd class="col-12 col-md-8">@Model.IncrementoMinimo.ToString("₡#,##0.00")</dd>
 
                     <dt class="col-12 col-md-4 text-muted">Estado Actual</dt>
-                    <dd class="col-12 col-md-8">
-                        @(Model.IdEstadoSubastaNavigation.Nombre)
-                    </dd>
+                    <dd class="col-12 col-md-8">@Model.IdEstadoSubastaNavigation.Nombre</dd>
 
                     <dt class="col-12 col-md-4 text-muted">Cantidad de Pujas</dt>
-                    <dd class="col-12 col-md-8">
-                        @(Model.PujasSubasta)
-                    </dd>
-
-                   
+                    <dd class="col-12 col-md-8"><span id="cantidad-pujas">@Model.PujasSubasta</span></dd>
                 </dl>
 
                 <hr class="my-4" />
 
-                <!-- Acciones -->
+                @if (Model.IdEstadoSubasta == 1)
+                {
+                    <section class="mb-4">
+                        <h3 class="h6 mb-2">Registro de puja</h3>
+                        <p class="small text-muted mb-3">
+                            Monto mínimo permitido actual:
+                            <strong id="monto-minimo-info">@montoMinimoPuja.ToString("₡#,##0.00")</strong>
+                        </p>
+
+                        <div id="puja-feedback" class="alert d-none mb-3" role="alert"></div>
+
+                        <button id="btn-abrir-modal-puja" type="button" class="btn btn-primary">
+                            <i class="bi bi-hammer me-1"></i> Pujar
+                        </button>
+                    </section>
+                }
+
+                <section class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h3 class="h6 mb-0">Historial de pujas</h3>
+                        <a asp-controller="Puja"
+                           asp-action="IndexPS"
+                           asp-route-idSubasta="@Model.IdSubasta"
+                           class="small text-decoration-none text-primary">
+                            Ver historial completo
+                        </a>
+                    </div>
+
+                    <ul id="historial-pujas" class="list-group rounded-3 border bg-white">
+                        @if (historialPujas.Any())
+                        {
+                            foreach (var puja in historialPujas.Take(5))
+                            {
+                                <li class="list-group-item bg-white">
+                                    <div class="d-flex justify-content-between align-items-start flex-column flex-md-row gap-1">
+                                        <span class="fw-semibold text-primary">
+                                            @puja.IdUsuarioNavigation.Nombre @puja.IdUsuarioNavigation.Apellido1 @puja.IdUsuarioNavigation.Apellido2
+                                        </span>
+                                        <span class="fw-semibold text-primary-emphasis">@puja.Monto.ToString("₡#,##0.00")</span>
+                                    </div>
+                                    <small class="text-muted">@puja.FechaHora.ToString("dd/MM/yyyy HH:mm:ss")</small>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li id="historial-vacio" class="list-group-item text-muted bg-white">Aún no hay pujas registradas.</li>
+                        }
+                    </ul>
+                </section>
+
+                <hr class="my-4" />
+
                 <div class="d-flex flex-column flex-sm-row gap-2 justify-content-end">
                     <a asp-controller="Puja" asp-action="IndexPS" asp-route-idSubasta="@Model.IdSubasta" class="btn btn-outline-primary">
                         <i class="bi bi-clock-history me-1"></i> Historial de Pujas
                     </a>
 
-                    @* Botón Cancelar Subasta (solo si está activa) *@
-                    @if (Model.IdEstadoSubasta == 1) @* Solo para subastas activas *@
+                    @if (Model.IdEstadoSubasta == 1)
                     {
                         <button type="button" class="btn btn-outline-danger"
                                 data-subasta-id="@Model.IdSubasta"
@@ -179,12 +190,59 @@
                         </button>
                     }
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMACIÓN PARA CANCELAR SUBASTA ACTIVA -->
+    <div class="modal fade" id="modalPujar" tabindex="-1" aria-labelledby="modalPujarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalPujarLabel">
+                        <i class="bi bi-hammer me-2"></i>Registrar Puja
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body pt-3">
+                    <div class="mb-3">
+                        <label class="form-label">Fecha y hora de registro</label>
+                        <input id="fecha-hora-puja" class="form-control" readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Usuario</label>
+                        <select id="select-usuario-puja" class="form-select" asp-items="listUsuariosPuja">
+                            <option value="">Seleccione un usuario</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Monto ofertado</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₡</span>
+                            <input id="input-monto-puja-modal"
+                                   type="number"
+                                   class="form-control"
+                                   min="1"
+                                   step="1"
+                                   placeholder="Ingrese el monto de la puja" />
+                        </div>
+                    </div>
+
+                    <div id="puja-feedback-modal" class="alert d-none mb-0" role="alert"></div>
+                </div>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Cerrar</button>
+                    <button id="btn-confirmar-puja-modal" type="button" class="btn btn-outline-success">
+                        <i class="bi bi-check2-circle me-1"></i> Confirmar puja
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="cancelarActivaModal" tabindex="-1" aria-labelledby="cancelarActivaModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
@@ -235,14 +293,246 @@
 
     @section Scripts {
         <script>
+            const idSubasta = @Model.IdSubasta;
+            const urlRegistrarPuja = '@Url.Action("RegistrarPuja", "Subasta")';
+
+            const incrementoMinimo = Number.parseFloat('@Model.IncrementoMinimo.ToString(CultureInfo.InvariantCulture)');
+            let montoMinimoActual = Number.parseFloat('@montoMinimoPuja.ToString(CultureInfo.InvariantCulture)');
+
+            const nombreSubasta = document.getElementById('nombre-subasta')?.textContent?.trim() ?? 'Subasta';
+
+            let liderActualMonto = Number.parseFloat('@(pujaLider != null ? pujaLider.Monto.ToString(CultureInfo.InvariantCulture) : "0")');
+            let liderActualUsuario = '@(pujaLider != null ? $"{pujaLider.IdUsuarioNavigation.Nombre} {pujaLider.IdUsuarioNavigation.Apellido1} {pujaLider.IdUsuarioNavigation.Apellido2}".Trim().Replace("'", "\\'") : "")';
+
+            function publicarEnCampana(titulo, mensaje) {
+                document.dispatchEvent(new CustomEvent('subasta:notificacion', {
+                    detail: { titulo, mensaje }
+                }));
+            }
+
+            function formatearMonedaCRC(valor) {
+                return new Intl.NumberFormat('es-CR', {
+                    style: 'currency',
+                    currency: 'CRC',
+                    minimumFractionDigits: 2
+                }).format(valor);
+            }
+
+            function mostrarFeedback(idElemento, mensaje, tipo) {
+                const feedback = document.getElementById(idElemento);
+                if (!feedback) return;
+
+                feedback.classList.remove('d-none', 'alert-success', 'alert-danger', 'alert-warning', 'alert-info');
+                feedback.classList.add(`alert-${tipo}`);
+                feedback.textContent = mensaje;
+            }
+
+            function limpiarFeedback(idElemento) {
+                const feedback = document.getElementById(idElemento);
+                if (!feedback) return;
+
+                feedback.classList.add('d-none');
+                feedback.textContent = '';
+                feedback.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
+            }
+
+            function agregarPujaAlHistorial(puja) {
+                const historial = document.getElementById('historial-pujas');
+                if (!historial) return;
+
+                const vacio = document.getElementById('historial-vacio');
+                if (vacio) vacio.remove();
+
+                const li = document.createElement('li');
+                li.className = 'list-group-item bg-white';
+                li.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start flex-column flex-md-row gap-1">
+                        <span class="fw-semibold text-primary">${puja.usuario}</span>
+                        <span class="fw-semibold text-primary-emphasis">${formatearMonedaCRC(puja.monto)}</span>
+                    </div>
+                    <small class="text-muted">${puja.fechaHora}</small>
+                `;
+
+                historial.prepend(li);
+
+                // Mantener solo las 5 pujas más recientes en esta vista
+                while (historial.children.length > 5) {
+                    historial.removeChild(historial.lastElementChild);
+                }
+            }
+
+            function formatearTiempoRestante(totalSegundos) {
+                const dias = Math.floor(totalSegundos / 86400);
+                const horas = Math.floor((totalSegundos % 86400) / 3600);
+                const minutos = Math.floor((totalSegundos % 3600) / 60);
+                const segundos = totalSegundos % 60;
+
+                const hh = String(horas).padStart(2, '0');
+                const mm = String(minutos).padStart(2, '0');
+                const ss = String(segundos).padStart(2, '0');
+
+                return dias > 0 ? `${dias}d ${hh}:${mm}:${ss}` : `${hh}:${mm}:${ss}`;
+            }
+
+            function bloquearPujaPorCierre() {
+                const btnAbrir = document.getElementById('btn-abrir-modal-puja');
+                const btnConfirmar = document.getElementById('btn-confirmar-puja-modal');
+
+                if (btnAbrir) {
+                    btnAbrir.disabled = true;
+                    btnAbrir.classList.remove('btn-primary');
+                    btnAbrir.classList.add('btn-secondary');
+                    btnAbrir.innerHTML = '<i class="bi bi-lock me-1"></i> Subasta cerrada';
+                }
+
+                if (btnConfirmar) {
+                    btnConfirmar.disabled = true;
+                }
+            }
+
+            function iniciarContadorSubasta() {
+                const contador = document.getElementById('contador-tiempo');
+                if (!contador) return;
+
+                const fechaCierreTexto = contador.getAttribute('data-fecha-cierre');
+                if (!fechaCierreTexto) return;
+
+                const fechaCierre = new Date(fechaCierreTexto);
+
+                const actualizar = () => {
+                    const ahora = new Date();
+                    const diferenciaMs = fechaCierre - ahora;
+                    const segundosRestantes = Math.floor(diferenciaMs / 1000);
+
+                    if (segundosRestantes <= 0) {
+                        contador.textContent = 'Finalizada';
+                        contador.classList.remove('text-primary');
+                        contador.classList.add('text-danger');
+                        bloquearPujaPorCierre();
+                        return;
+                    }
+
+                    contador.textContent = formatearTiempoRestante(segundosRestantes);
+                };
+
+                actualizar();
+                setInterval(actualizar, 1000);
+            }
+
+            function abrirModalPuja() {
+                limpiarFeedback('puja-feedback-modal');
+
+                const fechaHoraInput = document.getElementById('fecha-hora-puja');
+                if (fechaHoraInput) {
+                    fechaHoraInput.value = new Date().toLocaleString('es-CR');
+                }
+
+                const inputMonto = document.getElementById('input-monto-puja-modal');
+                if (inputMonto) {
+                    inputMonto.value = '';
+                }
+
+                const modal = new bootstrap.Modal(document.getElementById('modalPujar'));
+                modal.show();
+            }
+
+            async function registrarPujaAsync() {
+                const btnConfirmar = document.getElementById('btn-confirmar-puja-modal');
+                const inputMonto = document.getElementById('input-monto-puja-modal');
+                const selectUsuario = document.getElementById('select-usuario-puja');
+
+                const montoTexto = inputMonto?.value?.trim() || '';
+                const monto = Number.parseFloat(montoTexto.replace(',', '.'));
+                const idUsuario = Number.parseInt(selectUsuario?.value || '0');
+
+                if (!idUsuario || idUsuario <= 0) {
+                    mostrarFeedback('puja-feedback-modal', 'Debe seleccionar un usuario.', 'warning');
+                    selectUsuario.focus();
+                    return;
+                }
+
+                if (!montoTexto || Number.isNaN(monto) || monto <= 0) {
+                    mostrarFeedback('puja-feedback-modal', 'Debe ingresar un monto válido.', 'warning');
+                    inputMonto.focus();
+                    return;
+                }
+
+                if (monto < montoMinimoActual) {
+                    mostrarFeedback('puja-feedback-modal', `El monto mínimo permitido es ${formatearMonedaCRC(montoMinimoActual)}.`, 'warning');
+                    inputMonto.focus();
+                    return;
+                }
+
+                try {
+                    btnConfirmar.disabled = true;
+                    limpiarFeedback('puja-feedback-modal');
+
+                    const response = await fetch(urlRegistrarPuja, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            idSubasta: idSubasta,
+                            monto: monto,
+                            idUsuario: idUsuario
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.ok) {
+                        mostrarFeedback('puja-feedback-modal', data?.mensaje || 'No fue posible registrar la puja.', 'danger');
+                        return;
+                    }
+
+                    const nuevoMonto = Number.parseFloat(data.puja.monto);
+                    const nuevoUsuario = data.puja.usuario ?? '';
+
+                    const huboLiderPrevio = liderActualMonto > 0 && liderActualUsuario !== '';
+                    const cambioDeLider = huboLiderPrevio && nuevoUsuario !== liderActualUsuario;
+                    const realmenteSupero = nuevoMonto > liderActualMonto;
+
+                    if (huboLiderPrevio && cambioDeLider && realmenteSupero) {
+                        const mensajeSuperada = `La puja de ${liderActualUsuario} en la subasta ${nombreSubasta} ha sido superada por ${nuevoUsuario}.`;
+                        publicarEnCampana('Puja superada', mensajeSuperada);
+                    }
+
+                    liderActualMonto = nuevoMonto;
+                    liderActualUsuario = nuevoUsuario;
+
+                    agregarPujaAlHistorial(data.puja);
+
+                    const cantidadPujas = document.getElementById('cantidad-pujas');
+                    if (cantidadPujas) {
+                        const actual = Number.parseInt(cantidadPujas.textContent || '0');
+                        cantidadPujas.textContent = (actual + 1).toString();
+                    }
+
+                    montoMinimoActual = nuevoMonto + incrementoMinimo;
+                    const montoMinimoInfo = document.getElementById('monto-minimo-info');
+                    if (montoMinimoInfo) {
+                        montoMinimoInfo.textContent = formatearMonedaCRC(montoMinimoActual);
+                    }
+
+                    mostrarFeedback('puja-feedback', data.mensaje || 'Puja registrada correctamente.', 'success');
+
+                    const modalElement = document.getElementById('modalPujar');
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    }
+                } catch {
+                    mostrarFeedback('puja-feedback-modal', 'Ocurrió un error inesperado al registrar la puja.', 'danger');
+                } finally {
+                    btnConfirmar.disabled = false;
+                }
+            }
+
             function handleCancelarActivaClick(button) {
                 const subastaId = button.getAttribute('data-subasta-id');
                 const subastaNombre = button.getAttribute('data-subasta-nombre');
                 const pujasCantidad = parseInt(button.getAttribute('data-pujas-cantidad'));
 
-                // Validar si tiene pujas
                 if (pujasCantidad > 0) {
-                    // Mostrar SweetAlert de error si tiene pujas
                     Swal.fire({
                         title: 'No se puede cancelar',
                         text: `No se puede cancelar la subasta "${subastaNombre}" porque ya tiene ${pujasCantidad} puja(s) registrada(s).`,
@@ -253,16 +543,13 @@
                     return;
                 }
 
-                // Si no tiene pujas, mostrar modal de confirmación
                 document.getElementById('modalCancelarActivaSubastaId').textContent = subastaId;
                 document.getElementById('modalCancelarActivaSubastaNombre').textContent = subastaNombre;
                 document.getElementById('modalCancelarActivaPujas').textContent = pujasCantidad;
 
-                // Configurar formulario
                 const cancelarForm = document.getElementById('cancelarActivaForm');
                 cancelarForm.action = '@Url.Action("ChangeEstado", "Subasta", new { returnTo = "IndexSA" })';
 
-                // Agregar campo hidden para el ID
                 let hiddenId = cancelarForm.querySelector('input[name="id"]');
                 if (!hiddenId) {
                     hiddenId = document.createElement('input');
@@ -272,10 +559,24 @@
                 }
                 hiddenId.value = subastaId;
 
-                // Mostrar el modal
                 const cancelarModal = new bootstrap.Modal(document.getElementById('cancelarActivaModal'));
                 cancelarModal.show();
             }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const btnAbrir = document.getElementById('btn-abrir-modal-puja');
+                const btnConfirmar = document.getElementById('btn-confirmar-puja-modal');
+
+                if (btnAbrir) {
+                    btnAbrir.addEventListener('click', abrirModalPuja);
+                }
+
+                if (btnConfirmar) {
+                    btnConfirmar.addEventListener('click', registrarPujaAsync);
+                }
+
+                iniciarContadorSubasta();
+            });
         </script>
     }
 

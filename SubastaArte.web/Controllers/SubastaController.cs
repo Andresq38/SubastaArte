@@ -12,14 +12,19 @@ namespace SubastaArte.web.Controllers
     public class SubastaController : Controller
     {
         private readonly IServiceSubasta _serviceSubasta;
-        private readonly IServiceObjeto _serviceObjeto; 
+        private readonly IServiceObjeto _serviceObjeto;
         private readonly IServiceUsuario _serviceUsuario;
+        private readonly IServicePuja _servicePuja;
 
-        public SubastaController(IServiceSubasta serviceSubasta, IServiceObjeto serviceObjeto, IServiceUsuario serviceUsuario)
+        // Variable lógica interna del usuario actual (simulación para pruebas)
+        private const int IdUsuarioActualSimulado = 5;
+
+        public SubastaController(IServiceSubasta serviceSubasta,IServiceObjeto serviceObjeto,IServiceUsuario serviceUsuario,IServicePuja servicePuja)
         {
             _serviceSubasta = serviceSubasta;
             _serviceObjeto = serviceObjeto;
             _serviceUsuario = serviceUsuario;
+            _servicePuja = servicePuja;
         }
 
         [HttpGet]
@@ -72,24 +77,52 @@ namespace SubastaArte.web.Controllers
                 {
                     TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
                        "Subasta No encontrada",
-                       $"No existe una subasta sin ID",
+                       "No existe una subasta sin ID",
                        SweetAlertMessageType.error
                    );
                     return RedirectToAction("Index");
                 }
-                var @object = await _serviceSubasta.FindByIdAsync(id.Value);
-                if (@object == null)
+
+                var subasta = await _serviceSubasta.FindByIdAsync(id.Value);
+                if (subasta == null)
                 {
                     throw new Exception("Subasta no existente");
-
                 }
+
+                var historialPujas = await _servicePuja.ListSubastaIdAsync(id.Value);
+                var historialOrdenado = historialPujas
+                    .OrderByDescending(x => x.FechaHora)
+                    .ToList();
+
+                var pujaLider = historialPujas
+                    .OrderByDescending(x => x.Monto)
+                    .ThenByDescending(x => x.FechaHora)
+                    .FirstOrDefault();
+
+                var usuarios = await _serviceUsuario.ListAsync() ?? new List<UsuarioDTO>();
+
+                var usuariosDisponibles = usuarios
+                    .Where(u => u.IdRol == 3)          // Compradores
+                    .Where(u => u.IdEstadoUsuario == 1) // Activos
+                    .Select(u => new
+                    {
+                        IdUsuario = u.IdUsuario,
+                        NombreCompleto = $"{u.Nombre} {u.Apellido1} {u.Apellido2}".Trim()
+                    })
+                    .OrderBy(u => u.NombreCompleto)
+                    .ToList();
+
+                ViewBag.HistorialPujas = historialOrdenado;
+                ViewBag.PujaLider = pujaLider;
+                ViewBag.ListUsuariosPuja = new SelectList(usuariosDisponibles, "IdUsuario", "NombreCompleto");
+
                 ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
                    "Detalle de la Subasta",
-                   $"Mostrando información de la Subasta: {@object.Nombre}",
+                   $"Mostrando información de la Subasta: {subasta.Nombre}",
                    SweetAlertMessageType.info
                );
-                return View(@object);
 
+                return View(subasta);
             }
             catch (Exception ex)
             {
@@ -377,10 +410,130 @@ namespace SubastaArte.web.Controllers
             else
                 return RedirectToAction(nameof(IndexAdmin));
         }
+                    
+        public class RegistrarPujaRequest
+        {
+            public int IdSubasta { get; set; }
+            public decimal Monto { get; set; }
+            public int IdUsuario { get; set; }
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> RegistrarPuja([FromBody] RegistrarPujaRequest request)
+        {
+            if (request == null || request.IdSubasta <= 0 || request.Monto <= 0)
+            {
+                return BadRequest(new
+                {
+                    ok = false,
+                    mensaje = "Datos de puja inválidos."
+                });
+            }
 
+            if (request.IdUsuario <= 0)
+            {
+                return BadRequest(new
+                {
+                    ok = false,
+                    mensaje = "Debe seleccionar un usuario para registrar la puja."
+                });
+            }
 
+            try
+            {
+                var puja = await _servicePuja.RegistrarPujaAsync(
+                    request.IdSubasta,
+                    request.Monto,
+                    request.IdUsuario
+                );
 
+                var nombreUsuarioPuja = $"{puja.IdUsuarioNavigation.Nombre} {puja.IdUsuarioNavigation.Apellido1} {puja.IdUsuarioNavigation.Apellido2}".Trim();
 
+                return Json(new
+                {
+                    ok = true,
+                    mensaje = "Puja registrada correctamente.",
+                    puja = new
+                    {
+                        idPuja = puja.IdPuja,
+                        idUsuario = puja.IdUsuario,
+                        usuario = nombreUsuarioPuja,
+                        monto = puja.Monto,
+                        fechaHora = puja.FechaHora.ToString("dd/MM/yyyy HH:mm:ss")
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new
+                {
+                    ok = false,
+                    mensaje = ex.Message
+                });
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    ok = false,
+                    mensaje = "Ocurrió un error inesperado al registrar la puja."
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerificarPujaSuperada(int idSubasta, int idUsuario)
+        {
+            if (idSubasta <= 0 || idUsuario <= 0)
+            {
+                return BadRequest(new
+                {
+                    ok = false,
+                    mensaje = "Parámetros inválidos."
+                });
+            }
+
+            var pujas = await _servicePuja.ListSubastaIdAsync(idSubasta);
+
+            if (pujas == null || !pujas.Any())
+            {
+                return Json(new
+                {
+                    ok = true,
+                    mostrar = false
+                });
+            }
+
+            var usuarioTienePuja = pujas.Any(p => p.IdUsuario == idUsuario);
+            if (!usuarioTienePuja)
+            {
+                return Json(new
+                {
+                    ok = true,
+                    mostrar = false
+                });
+            }
+
+            var pujaLider = pujas
+                .OrderByDescending(p => p.Monto)
+                .ThenByDescending(p => p.FechaHora)
+                .First();
+
+            var pujaMasAltaUsuario = pujas
+                .Where(p => p.IdUsuario == idUsuario)
+                .OrderByDescending(p => p.Monto)
+                .ThenByDescending(p => p.FechaHora)
+                .First();
+
+            var fueSuperada = pujaLider.IdUsuario != idUsuario && pujaMasAltaUsuario.Monto < pujaLider.Monto;
+
+            return Json(new
+            {
+                ok = true,
+                mostrar = fueSuperada,
+                mensaje = fueSuperada ? "Su puja ha sido superada." : string.Empty
+            });
+        }
     }
 }
+    

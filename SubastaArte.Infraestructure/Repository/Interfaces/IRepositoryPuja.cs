@@ -13,6 +13,9 @@ namespace SubastaArte.Infraestructure.Repository.Interfaces
         Task<Puja> FindByIdAsync(int id);
 
         Task<ICollection<Puja>> ListSubastaIdAsync(int idSubasta);
+        Task<Puja> AddAsync(Puja entity);
+        Task<Puja?> GetHighestBidBySubastaAsync(int idSubasta);
+
 
     }
 }

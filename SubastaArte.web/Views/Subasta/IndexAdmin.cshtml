@@ -284,7 +284,7 @@
 
                 // Configurar formulario
                 const cancelarForm = document.getElementById('cancelarForm');
-                cancelarForm.action = '@Url.Action("CancelarSubasta", "Subasta")';
+                cancelarForm.action = '@Url.Action("ChangeEstado", "Subasta", new { returnTo = "IndexAdmin" })';
 
                 // Agregar campo hidden para el ID
                 let hiddenId = cancelarForm.querySelector('input[name="id"]');

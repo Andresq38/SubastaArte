@@ -69,14 +69,152 @@
     {
         var notificacion = TempData["Notificacion"] ?? ViewBag.Notificacion;
         <script type="text/javascript">
-
             const payload = @Html.Raw(notificacion);
-
             if (payload) {
                 Swal.fire(payload);
             }
         </script>
     }
+
+    <!-- Campana global: notificaciones temporales en sesión -->
+    <!-- Campana global: notificaciones temporales en sesión -->
+    <script>
+        (function () {
+            const storageKey = 'subasta_notificaciones_temp';
+
+            function loadItems() {
+                try {
+                    return JSON.parse(sessionStorage.getItem(storageKey) ?? '[]');
+                } catch {
+                    return [];
+                }
+            }
+
+            function saveItems(items) {
+                sessionStorage.setItem(storageKey, JSON.stringify(items));
+            }
+
+            function countUnread(items) {
+                return items.filter(x => !x.leida).length;
+            }
+
+            function renderBell() {
+                const list = document.getElementById('menuBellList');
+                const badge = document.getElementById('menuBellBadge');
+                if (!list || !badge) return;
+
+                const items = loadItems();
+
+                if (!items.length) {
+                    list.innerHTML = '<div class="list-group-item text-muted small">No hay notificaciones.</div>';
+                    badge.classList.add('d-none');
+                    badge.textContent = '0';
+                    return;
+                }
+
+                const unread = countUnread(items);
+                if (unread > 0) {
+                    badge.classList.remove('d-none');
+                    badge.textContent = unread.toString();
+                } else {
+                    badge.classList.add('d-none');
+                    badge.textContent = '0';
+                }
+
+                list.innerHTML = items
+                    .slice()
+                    .reverse()
+                    .map(n => `
+                        <div class="list-group-item ${n.leida ? 'opacity-75' : ''}" data-id="${n.id}">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <div class="pe-2">
+                                    <div class="fw-semibold small">${n.titulo}</div>
+                                    <div class="small text-muted">${n.mensaje}</div>
+                                    <div class="small text-secondary">${n.fecha}</div>
+                                </div>
+                                <button type="button"
+                                        class="btn btn-sm ${n.leida ? 'btn-outline-secondary' : 'btn-outline-success'} menuBellMarkRead"
+                                        ${n.leida ? 'disabled' : ''}>
+                                    ${n.leida ? 'Leída' : 'Marcar leída'}
+                                </button>
+                            </div>
+                        </div>
+                    `)
+                    .join('');
+            }
+
+            function addNotification(titulo, mensaje) {
+                const items = loadItems();
+                items.push({
+                    id: Date.now() + Math.floor(Math.random() * 1000),
+                    titulo: titulo || 'Notificación',
+                    mensaje: mensaje || '',
+                    fecha: new Date().toLocaleString('es-CR'),
+                    leida: false
+                });
+                saveItems(items);
+                renderBell();
+            }
+
+            function markRead(id) {
+                const items = loadItems();
+                const updated = items.map(x => String(x.id) === String(id) ? { ...x, leida: true } : x);
+                saveItems(updated);
+                renderBell();
+            }
+
+            function markAllRead() {
+                const items = loadItems();
+                const updated = items.map(x => ({ ...x, leida: true }));
+                saveItems(updated);
+                renderBell();
+            }
+
+            function clearNotifications() {
+                saveItems([]);
+                renderBell();
+            }
+
+            window.SubastaBell = {
+                add: addNotification,
+                markAllRead: markAllRead,
+                clear: clearNotifications,
+                render: renderBell
+            };
+
+            document.addEventListener('DOMContentLoaded', function () {
+                renderBell();
+
+                const clearBtn = document.getElementById('menuBellClear');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        markAllRead();
+                    });
+                }
+
+                const list = document.getElementById('menuBellList');
+                if (list) {
+                    list.addEventListener('click', function (e) {
+                        const btn = e.target.closest('.menuBellMarkRead');
+                        if (!btn || btn.disabled) return;
+
+                        const item = btn.closest('[data-id]');
+                        if (!item) return;
+
+                        const id = item.getAttribute('data-id');
+                        markRead(id);
+                    });
+                }
+            });
+
+            document.addEventListener('subasta:notificacion', function (event) {
+                const detail = event.detail || {};
+                if (!detail.mensaje) return;
+                addNotification(detail.titulo || 'Notificación', detail.mensaje);
+            });
+        })();
+    </script>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

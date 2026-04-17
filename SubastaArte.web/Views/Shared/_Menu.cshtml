@@ -19,19 +19,19 @@
                     </a>
                 </li>
 
-                
-
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-wrench me-1"></i>Mantenimiento
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item"  asp-controller="Usuario" asp-action="Index">
+                        <li>
+                            <a class="dropdown-item" asp-controller="Usuario" asp-action="Index">
                                 <i class="bi bi-people me-2"></i> Usuarios
                             </a>
                         </li>
-                        <li><a class="dropdown-item" asp-controller="Objeto" asp-action="IndexAdmin">
+                        <li>
+                            <a class="dropdown-item" asp-controller="Objeto" asp-action="IndexAdmin">
                                 <i class="bi bi-box-seam me-2"></i> Objetos
                             </a>
                         </li>
@@ -49,63 +49,45 @@
                         <i class="bi bi-cash-coin me-1"></i>Subastas
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" asp-controller="Subasta" asp-action="IndexSA">
+                        <li>
+                            <a class="dropdown-item" asp-controller="Subasta" asp-action="IndexSA">
                                 <i class="bi bi-check-circle me-2"></i> Subastas Activas
                             </a>
                         </li>
-                        <li><a class="dropdown-item" asp-controller="Subasta" asp-action="IndexSF">
+                        <li>
+                            <a class="dropdown-item" asp-controller="Subasta" asp-action="IndexSF">
                                 <i class="bi bi-x-circle me-2"></i> Subastas Finalizadas/Canceladas
                             </a>
                         </li>
                     </ul>
                 </li>
-
-              @*   <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-gear-fill me-1"></i>Proceso
-                    </a>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bar-chart-fill me-1"></i>Reportes
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item">Gráfico Ventas</a></li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-people me-1"></i>Seguridad
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item">
-                                <i class="bi bi-person-bounding-box me-1"></i>Usuarios
-                            </a>
-                        </li>
-                    </ul>
-                </li> *@
             </ul>
 
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item dropdown">
-                    @* CON IMAGEN *@
-                    @* <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <img class="rounded-circle me-2"
-                             src="~/images/profile.png"
-                             alt="Perfil"
-                             width="32" height="32" />
-                        <span class="d-none d-sm-inline">
-                            Invitado
+            <ul class="navbar-nav ms-auto align-items-center">
+                <!-- Campana global (izquierda de Invitado) -->
+                <li class="nav-item dropdown me-2">
+                    <a class="nav-link position-relative" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false" title="Notificaciones">
+                        <i class="bi bi-bell" style="font-size:1.35rem;"></i>
+                        <span id="menuBellBadge"
+                              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                            0
                         </span>
-                    </a> *@
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end p-0 shadow-sm" style="min-width: 360px;">
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                            <strong class="small mb-0">Notificaciones</strong>
+                            <button id="menuBellClear" type="button" class="btn btn-sm btn-link text-decoration-none p-0">
+                                Marcar todas
+                            </button>
+                        </div>
+                        <div id="menuBellList" class="list-group list-group-flush">
+                            <div class="list-group-item text-muted small">No hay notificaciones.</div>
+                        </div>
+                    </div>
+                </li>
 
-                    @* CON ICONO*@
+                <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle me-2" style="font-size: 2rem;"></i>
@@ -115,8 +97,7 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item">Salir</a></li>
-                        <li><a class=" dropdown-item">Ingresar</a></li>
-
+                        <li><a class="dropdown-item">Ingresar</a></li>
                     </ul>
                 </li>
             </ul>

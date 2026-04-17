@@ -20,7 +20,7 @@
 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
     <div>
         <h1 class="h3 mb-1">Subastas Finalizadas</h1>
-        <p class="text-muted mb-0">Gestión administrativa de subastas Finalizadas. Total: <strong>@total</strong>.</p>
+        <p class="text-muted mb-0">Gestión administrativa de subastas Finalizadas. @* Total: <strong>@total</strong>. *@</p>
     </div>
 
     <div class="d-flex flex-wrap gap-2">
@@ -123,7 +123,7 @@
             <nav aria-label="Paginación de Subastas Activas">
                 @Html.PagedListPager(
                          Model,
-                         page => Url.Action("IndexSA", new { page }),
+                         page => Url.Action("IndexSF", new { page }),
                          new PagedListRenderOptions
             {
                 UlElementClasses = new[] { "pagination", "mb-0" },
