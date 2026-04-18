@@ -15,16 +15,21 @@ namespace SubastaArte.web.Controllers
         private readonly IServiceObjeto _serviceObjeto;
         private readonly IServiceUsuario _serviceUsuario;
         private readonly IServicePuja _servicePuja;
+        private readonly IServiceResultadoSubasta _serviceResultadoSubasta;
 
-        // Variable lógica interna del usuario actual (simulación para pruebas)
+        // Variable de usuario pra pruebas
         private const int IdUsuarioActualSimulado = 5;
 
-        public SubastaController(IServiceSubasta serviceSubasta,IServiceObjeto serviceObjeto,IServiceUsuario serviceUsuario,IServicePuja servicePuja)
+        public SubastaController(IServiceSubasta serviceSubasta,IServiceObjeto serviceObjeto,
+                                 IServiceUsuario serviceUsuario,
+                                 IServicePuja servicePuja,
+                                 IServiceResultadoSubasta serviceResultadoSubasta)
         {
             _serviceSubasta = serviceSubasta;
             _serviceObjeto = serviceObjeto;
             _serviceUsuario = serviceUsuario;
             _servicePuja = servicePuja;
+            _serviceResultadoSubasta = serviceResultadoSubasta;
         }
 
         [HttpGet]
@@ -139,30 +144,41 @@ namespace SubastaArte.web.Controllers
                 {
                     TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
                        "Subasta No encontrada",
-                       $"No existe una subasta sin ID",
+                       "No existe una subasta sin ID",
                        SweetAlertMessageType.error
                    );
-                    return RedirectToAction("Index");
+                    return RedirectToAction("IndexSF");
                 }
-                var @object = await _serviceSubasta.FindByIdAsync(id.Value);
-                if (@object == null)
+
+                var subasta = await _serviceSubasta.FindByIdAsync(id.Value);
+                if (subasta == null)
                 {
                     throw new Exception("Subasta no existente");
-
                 }
+
+                var historialPujas = await _servicePuja.ListSubastaIdAsync(id.Value);
+                var historialOrdenado = historialPujas
+                    .OrderByDescending(x => x.FechaHora)
+                    .ToList();
+
+                var resultado = (await _serviceResultadoSubasta.ListAsync())
+                    .FirstOrDefault(x => x.IdSubasta == id.Value);
+
+                ViewBag.HistorialPujas = historialOrdenado;
+                ViewBag.ResultadoSubasta = resultado;
+
                 ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
                    "Detalle de la Subasta",
-                   $"Mostrando información de la Subasta: {@object.Nombre}",
+                   $"Mostrando información de la Subasta: {subasta.Nombre}",
                    SweetAlertMessageType.info
                );
-                return View(@object);
 
+                return View(subasta);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-
         }
 
         // -------------------------
@@ -564,19 +580,6 @@ namespace SubastaArte.web.Controllers
                     });
                 }
 
-                // Si ya está finalizada, devolvemos OK idempotente
-                if (subasta.IdEstadoSubasta == 2)
-                {
-                    return Json(new
-                    {
-                        ok = true,
-                        mensaje = "La subasta ya estaba finalizada.",
-                        estadoId = 2,
-                        estadoNombre = "Finalizada"
-                    });
-                }
-
-                // Si está cancelada, no se cierra por este flujo
                 if (subasta.IdEstadoSubasta == 4)
                 {
                     return BadRequest(new
@@ -586,7 +589,6 @@ namespace SubastaArte.web.Controllers
                     });
                 }
 
-                // Asegura que no se cierre antes de tiempo
                 if (DateTime.Now < subasta.FechaCierre)
                 {
                     return BadRequest(new
@@ -596,15 +598,48 @@ namespace SubastaArte.web.Controllers
                     });
                 }
 
-                // Estado Finalizada = 2
-                await _serviceSubasta.ChangeEstadoAsync(request.IdSubasta, 2);
+                if (subasta.IdEstadoSubasta != 2)
+                {
+                    await _serviceSubasta.ChangeEstadoAsync(request.IdSubasta, 2);
+                }
+
+                var resultado = await _serviceResultadoSubasta.RegistrarResultadoAsync(request.IdSubasta, DateTime.Now);
+
+                if (resultado == null)
+                {
+                    return Json(new
+                    {
+                        ok = true,
+                        mensaje = "La subasta se finalizó automáticamente sin ofertas.",
+                        estadoId = 2,
+                        estadoNombre = "Finalizada",
+                        resultado = new
+                        {
+                            hayGanador = false
+                        }
+                    });
+                }
+
+                var nombreGanador = $"{resultado.IdUsuarioGanadorNavigation.Nombre} {resultado.IdUsuarioGanadorNavigation.Apellido1} {resultado.IdUsuarioGanadorNavigation.Apellido2}".Trim();
+                if (string.IsNullOrWhiteSpace(nombreGanador))
+                {
+                    nombreGanador = $"Usuario #{resultado.IdUsuario}";
+                }
 
                 return Json(new
                 {
                     ok = true,
                     mensaje = "La subasta se finalizó automáticamente.",
                     estadoId = 2,
-                    estadoNombre = "Finalizada"
+                    estadoNombre = "Finalizada",
+                    resultado = new
+                    {
+                        hayGanador = true,
+                        idUsuario = resultado.IdUsuario,
+                        usuarioGanador = nombreGanador,
+                        montoFinal = resultado.MontoFinal,
+                        fechaCierre = resultado.FechaCierre.ToString("dd/MM/yyyy HH:mm:ss")
+                    }
                 });
             }
             catch
@@ -616,6 +651,8 @@ namespace SubastaArte.web.Controllers
                 });
             }
         }
+
+
     }
 }
     

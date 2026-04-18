@@ -2,6 +2,16 @@
 
 @{
     ViewData["Title"] = "Detalle de la Subastas Finalizadas";
+
+    var historialPujas = ViewBag.HistorialPujas as ICollection<SubastaArte.Application.DTOs.PujaDTO>
+        ?? new List<SubastaArte.Application.DTOs.PujaDTO>();
+
+    var resultado = ViewBag.ResultadoSubasta as SubastaArte.Application.DTOs.ResultadoSubastaDTO;
+
+    var pujaGanadoraFallback = historialPujas
+    .OrderByDescending(x => x.Monto)
+    .ThenByDescending(x => x.FechaHora)
+    .FirstOrDefault();
 }
 
 <nav class="mb-3">
@@ -31,136 +41,152 @@
 
 <article class="card shadow-sm border-0 overflow-hidden">
     <div class="row g-0">
-
-        <!-- Imagen / portada -->
         <div class="col-12 col-lg-5 bg-body-tertiary p-3">
             @if (Model.IdObjetoNavigation.Foto != null && Model.IdObjetoNavigation.Foto.Any())
             {
-                <div id="carouselSubasta" class="carousel slide carousel-dark" data-bs-ride="carousel">
+                <div id="carouselSubastaSf" class="carousel slide carousel-dark" data-bs-ride="carousel">
                     <div class="carousel-inner text-center">
-
                         @{
                             var primera = true;
                         }
 
                         @foreach (var img in Model.IdObjetoNavigation.Foto)
                         {
-                            @* Una forma de ver imagenes *@
-                            @*  <div class="carousel-item @(primera ? "active" : "")">
-                                <img class="w-100 rounded"
-                                     style="max-height:500px; object-fit:cover;"
-                                     src="data:image/jpeg;base64,@Convert.ToBase64String(img.Foto)"
-                                     alt="Imagen de @Model.Nombre"
-                                     loading="lazy" />
-                            </div> *@
-
-                            @* Otra forma de ver imagenes *@
                             <div class="carousel-item @(primera ? "active" : "") text-center">
-
                                 <img class="img-fluid rounded"
                                      style="max-height:500px; object-fit:contain; background-color:#f8f9fa;"
                                      src="data:image/jpeg;base64,@Convert.ToBase64String(img.Foto)"
                                      alt="Imagen de @Model.Nombre"
                                      loading="lazy" />
-
                             </div>
-
                             primera = false;
                         }
                     </div>
 
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselSubasta" data-bs-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselSubastaSf" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon"></span>
                     </button>
-
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselSubasta" data-bs-slide="next">
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselSubastaSf" data-bs-slide="next">
                         <span class="carousel-control-next-icon"></span>
                     </button>
                 </div>
             }
         </div>
 
-        <!-- Contenido -->
         <div class="col-12 col-lg-7">
             <div class="card-body p-4">
 
                 <header class="mb-3">
                     <h2 class="h4 fw-semibold mb-1">@Model.Nombre</h2>
-
-                    <div>
-                        <!-- Condición -->
-                        <span class="badge text-bg-light mb-2">
-                            <i>Condicion:</i>
-                        </span>
-                        <span class="badge text-bg-light mb-2">
-                            <i class="bi bi-award me-1"></i>
-                            @Model.IdObjetoNavigation.Condicion
-                        </span>
-
-                        <!-- Categorías -->
-                        <div class="d-flex flex-wrap gap-2 mt-1">
-                            <span class="badge text-bg-light">
-                                <i>Categorias:</i>
-                            </span>
-                            @if (Model.IdObjetoNavigation.IdCategoria != null
-                            && Model.IdObjetoNavigation.IdCategoria.Any())
-                            {
-                                foreach (var c in Model.IdObjetoNavigation.IdCategoria)
-                                {
-                                    <span class="badge text-bg-light">
-                                        <i class="bi bi-tag me-1"></i>
-                                        @c.Nombre
-                                    </span>
-                                }
-                            }
-                            else
-                            {
-                                <span class="text-muted">Sin categorías</span>
-                            }
-                        </div>
-                    </div>
+                    <p class="text-muted mb-2">@Model.IdObjetoNavigation.Descripcion</p>
                 </header>
 
                 <hr class="my-3" />
 
-                <!-- Datos clave -->
                 <dl class="row mb-0">
-                    <dt class="col-12 col-md-4 text-muted">Fecha Inicio</dt>
+                    <dt class="col-12 col-md-4 text-muted">Vendedor</dt>
                     <dd class="col-12 col-md-8">
-                        @Model.FechaInicio
+                        @Model.IdVendedorNavigation.Nombre @Model.IdVendedorNavigation.Apellido1 @Model.IdVendedorNavigation.Apellido2
                     </dd>
+
+                    <dt class="col-12 col-md-4 text-muted">Fecha Inicio</dt>
+                    <dd class="col-12 col-md-8">@Model.FechaInicio</dd>
 
                     <dt class="col-12 col-md-4 text-muted">Fecha Cierre</dt>
-                    <dd class="col-12 col-md-8">
-                        @Model.FechaCierre
-                    </dd>
+                    <dd class="col-12 col-md-8">@Model.FechaCierre</dd>
 
                     <dt class="col-12 col-md-4 text-muted">Precio Base</dt>
-                    <dd class="col-12 col-md-8">
-                        @Model.PrecioBase.ToString("₡#,##0.00")
-                    </dd>
+                    <dd class="col-12 col-md-8">@Model.PrecioBase.ToString("₡#,##0.00")</dd>
 
                     <dt class="col-12 col-md-4 text-muted">Incremento Minimo</dt>
-                    <dd class="col-12 col-md-8">
-                        @(Model.IncrementoMinimo.ToString("₡#,##0.00"))
-                    </dd>
+                    <dd class="col-12 col-md-8">@Model.IncrementoMinimo.ToString("₡#,##0.00")</dd>
 
                     <dt class="col-12 col-md-4 text-muted">Estado Actual</dt>
-                    <dd class="col-12 col-md-8">
-                        @(Model.IdEstadoSubastaNavigation.Nombre)
-                    </dd>
+                    <dd class="col-12 col-md-8">@Model.IdEstadoSubastaNavigation.Nombre</dd>
 
                     <dt class="col-12 col-md-4 text-muted">Cantidad de Pujas</dt>
-                    <dd class="col-12 col-md-8">
-                        @(Model.PujasSubasta)
-                    </dd>
-
-
+                    <dd class="col-12 col-md-8">@Model.PujasSubasta</dd>
                 </dl>
 
                 <hr class="my-4" />
 
-                <!-- Acciones -->
+                <section class="mb-4">
+                    <h3 class="h6 mb-2">Resultado de la subasta</h3>
+
+                    @if (resultado == null && pujaGanadoraFallback == null)
+                    {
+                        <div class="alert alert-secondary mb-0">
+                            Subasta finalizada sin ofertas (sin ganador).
+                        </div>
+                    }
+                    else if (resultado != null)
+                    {
+                        <div class="alert alert-success mb-0">
+                            <div class="fw-semibold mb-1">
+                                Y el ganador de la subasta es:
+                                @resultado.IdUsuarioGanadorNavigation.Nombre @resultado.IdUsuarioGanadorNavigation.Apellido1 @resultado.IdUsuarioGanadorNavigation.Apellido2
+                            </div>
+                            <div>
+                                Con una puja ganadora de <strong>@resultado.MontoFinal.ToString("₡#,##0.00")</strong>.
+                            </div>
+                            <div class="small text-muted mt-1">
+                                Cierre: @resultado.FechaCierre.ToString("dd/MM/yyyy HH:mm:ss")
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success mb-0">
+                            <div class="fw-semibold mb-1">
+                                Y el ganador de la subasta es:
+                                @pujaGanadoraFallback!.IdUsuarioNavigation.Nombre @pujaGanadoraFallback.IdUsuarioNavigation.Apellido1 @pujaGanadoraFallback.IdUsuarioNavigation.Apellido2
+                            </div>
+                            <div>
+                                Con una puja ganadora de <strong>@pujaGanadoraFallback.Monto.ToString("₡#,##0.00")</strong>.
+                            </div>
+                            <div class="small text-muted mt-1">
+                                Fecha de la puja ganadora: @pujaGanadoraFallback.FechaHora.ToString("dd/MM/yyyy HH:mm:ss")
+                            </div>
+                        </div>
+                    }
+                </section>
+
+                <section class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h3 class="h6 mb-0">Últimas pujas</h3>
+                        <a asp-controller="Puja"
+                           asp-action="IndexPS"
+                           asp-route-idSubasta="@Model.IdSubasta"
+                           class="small text-decoration-none text-primary">
+                            Ver historial completo
+                        </a>
+                    </div>
+
+                    <ul id="historial-pujas" class="list-group rounded-3 border bg-white">
+                        @if (historialPujas.Any())
+                        {
+                            foreach (var puja in historialPujas.Take(5))
+                            {
+                                <li class="list-group-item bg-white">
+                                    <div class="d-flex justify-content-between align-items-start flex-column flex-md-row gap-1">
+                                        <span class="fw-semibold text-primary">
+                                            @puja.IdUsuarioNavigation.Nombre @puja.IdUsuarioNavigation.Apellido1 @puja.IdUsuarioNavigation.Apellido2
+                                        </span>
+                                        <span class="fw-semibold text-primary-emphasis">@puja.Monto.ToString("₡#,##0.00")</span>
+                                    </div>
+                                    <small class="text-muted">@puja.FechaHora.ToString("dd/MM/yyyy HH:mm:ss")</small>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item text-muted bg-white">No hay pujas registradas.</li>
+                        }
+                    </ul>
+                </section>
+
+                <hr class="my-4" />
+
                 <div class="d-flex flex-column flex-sm-row gap-2 justify-content-end">
                     <a asp-controller="Puja" asp-action="IndexPS" asp-route-idSubasta="@Model.IdSubasta" class="btn btn-outline-primary">
                         <i class="bi bi-clock-history me-1"></i> Historial de Pujas

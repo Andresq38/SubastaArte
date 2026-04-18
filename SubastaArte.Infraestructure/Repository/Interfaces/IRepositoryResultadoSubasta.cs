@@ -11,5 +11,8 @@ namespace SubastaArte.Infraestructure.Repository.Interfaces
     {
         Task<ICollection<ResultadoSubasta>> ListAsync();
         Task<ResultadoSubasta?> FindByIdAsync(int id);
+
+        Task<ResultadoSubasta?> FindBySubastaIdAsync(int idSubasta);
+        Task<int> AddAsync(ResultadoSubasta entity);
     }
 }

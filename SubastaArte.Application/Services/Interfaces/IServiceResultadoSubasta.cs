@@ -12,5 +12,8 @@ namespace SubastaArte.Application.Services.Interfaces
     {
         Task<ICollection<ResultadoSubastaDTO>> ListAsync();
         Task<ResultadoSubastaDTO?> FindByIdAsync(int id);
+
+        Task<ResultadoSubastaDTO?> FindBySubastaIdAsync(int idSubasta);
+        Task<ResultadoSubastaDTO?> RegistrarResultadoAsync(int idSubasta, DateTime fechaCierre);
     }
 }

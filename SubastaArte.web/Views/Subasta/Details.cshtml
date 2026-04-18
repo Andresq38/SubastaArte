@@ -418,7 +418,16 @@
                         estadoActual.textContent = data.estadoNombre || 'Finalizada';
                     }
 
-                    mostrarFeedback('puja-feedback', data.mensaje || 'La subasta se finalizó automáticamente.', 'info');
+                    if (data.resultado?.hayGanador) {
+                        const mensajeGanador = `Subasta finalizada. Ganador: ${data.resultado.usuarioGanador} con ${formatearMonedaCRC(data.resultado.montoFinal)}.`;
+                        mostrarFeedback('puja-feedback', mensajeGanador, 'info');
+                        publicarEnCampana('Subasta finalizada', mensajeGanador);
+                    } else {
+                        const mensajeSinOfertas = 'Subasta finalizada sin ofertas.';
+                        mostrarFeedback('puja-feedback', mensajeSinOfertas, 'info');
+                        publicarEnCampana('Subasta finalizada', mensajeSinOfertas);
+                    }
+
                     bloquearPujaPorCierre();
                 } catch {
                     mostrarFeedback('puja-feedback', 'Ocurrió un error al finalizar automáticamente la subasta.', 'danger');
