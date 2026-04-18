@@ -534,6 +534,88 @@ namespace SubastaArte.web.Controllers
                 mensaje = fueSuperada ? "Su puja ha sido superada." : string.Empty
             });
         }
+
+        public class CerrarSubastaRequest
+        {
+            public int IdSubasta { get; set; }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CerrarSubastaAutomatico([FromBody] CerrarSubastaRequest request)
+        {
+            if (request == null || request.IdSubasta <= 0)
+            {
+                return BadRequest(new
+                {
+                    ok = false,
+                    mensaje = "Datos inválidos para cierre de subasta."
+                });
+            }
+
+            try
+            {
+                var subasta = await _serviceSubasta.FindByIdAsync(request.IdSubasta);
+                if (subasta == null)
+                {
+                    return NotFound(new
+                    {
+                        ok = false,
+                        mensaje = "La subasta no existe."
+                    });
+                }
+
+                // Si ya está finalizada, devolvemos OK idempotente
+                if (subasta.IdEstadoSubasta == 2)
+                {
+                    return Json(new
+                    {
+                        ok = true,
+                        mensaje = "La subasta ya estaba finalizada.",
+                        estadoId = 2,
+                        estadoNombre = "Finalizada"
+                    });
+                }
+
+                // Si está cancelada, no se cierra por este flujo
+                if (subasta.IdEstadoSubasta == 4)
+                {
+                    return BadRequest(new
+                    {
+                        ok = false,
+                        mensaje = "La subasta está cancelada y no puede finalizarse por cierre automático."
+                    });
+                }
+
+                // Asegura que no se cierre antes de tiempo
+                if (DateTime.Now < subasta.FechaCierre)
+                {
+                    return BadRequest(new
+                    {
+                        ok = false,
+                        mensaje = "La subasta aún no llegó a su hora de cierre."
+                    });
+                }
+
+                // Estado Finalizada = 2
+                await _serviceSubasta.ChangeEstadoAsync(request.IdSubasta, 2);
+
+                return Json(new
+                {
+                    ok = true,
+                    mensaje = "La subasta se finalizó automáticamente.",
+                    estadoId = 2,
+                    estadoNombre = "Finalizada"
+                });
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    ok = false,
+                    mensaje = "Ocurrió un error al finalizar la subasta automáticamente."
+                });
+            }
+        }
     }
 }
     

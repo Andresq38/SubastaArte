@@ -113,7 +113,9 @@
                     <dd class="col-12 col-md-8">@Model.IncrementoMinimo.ToString("₡#,##0.00")</dd>
 
                     <dt class="col-12 col-md-4 text-muted">Estado Actual</dt>
-                    <dd class="col-12 col-md-8">@Model.IdEstadoSubastaNavigation.Nombre</dd>
+                    <dd class="col-12 col-md-8">
+                        <span id="estado-actual">@Model.IdEstadoSubastaNavigation.Nombre</span>
+                    </dd>
 
                     <dt class="col-12 col-md-4 text-muted">Cantidad de Pujas</dt>
                     <dd class="col-12 col-md-8"><span id="cantidad-pujas">@Model.PujasSubasta</span></dd>
@@ -299,6 +301,9 @@
             const incrementoMinimo = Number.parseFloat('@Model.IncrementoMinimo.ToString(CultureInfo.InvariantCulture)');
             let montoMinimoActual = Number.parseFloat('@montoMinimoPuja.ToString(CultureInfo.InvariantCulture)');
 
+            const urlCerrarSubastaAutomatico = '@Url.Action("CerrarSubastaAutomatico", "Subasta")';
+            let cierreSolicitado = false;
+
             const nombreSubasta = document.getElementById('nombre-subasta')?.textContent?.trim() ?? 'Subasta';
 
             let liderActualMonto = Number.parseFloat('@(pujaLider != null ? pujaLider.Monto.ToString(CultureInfo.InvariantCulture) : "0")');
@@ -390,6 +395,36 @@
                 }
             }
 
+            async function cerrarSubastaAutomaticoAsync() {
+                if (cierreSolicitado) return;
+                cierreSolicitado = true;
+
+                try {
+                    const response = await fetch(urlCerrarSubastaAutomatico, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idSubasta: idSubasta })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.ok) {
+                        mostrarFeedback('puja-feedback', data?.mensaje || 'No fue posible finalizar la subasta automáticamente.', 'warning');
+                        return;
+                    }
+
+                    const estadoActual = document.getElementById('estado-actual');
+                    if (estadoActual) {
+                        estadoActual.textContent = data.estadoNombre || 'Finalizada';
+                    }
+
+                    mostrarFeedback('puja-feedback', data.mensaje || 'La subasta se finalizó automáticamente.', 'info');
+                    bloquearPujaPorCierre();
+                } catch {
+                    mostrarFeedback('puja-feedback', 'Ocurrió un error al finalizar automáticamente la subasta.', 'danger');
+                }
+            }
+
             function iniciarContadorSubasta() {
                 const contador = document.getElementById('contador-tiempo');
                 if (!contador) return;
@@ -408,7 +443,9 @@
                         contador.textContent = 'Finalizada';
                         contador.classList.remove('text-primary');
                         contador.classList.add('text-danger');
+
                         bloquearPujaPorCierre();
+                        cerrarSubastaAutomaticoAsync();
                         return;
                     }
 
