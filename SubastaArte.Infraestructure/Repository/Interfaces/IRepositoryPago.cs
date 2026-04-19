@@ -11,5 +11,9 @@ namespace SubastaArte.Infraestructure.Repository.Interfaces
     {
         Task<ICollection<Pago>> ListAsync();
         Task<Pago?> FindByIdAsync(int id);
+
+        Task<Pago?> FindBySubastaIdAsync(int idSubasta);
+        Task<int> AddAsync(Pago entity);
+        Task ConfirmarPagoAsync(int idSubasta);
     }
 }

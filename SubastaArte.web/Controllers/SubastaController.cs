@@ -16,6 +16,7 @@ namespace SubastaArte.web.Controllers
         private readonly IServiceUsuario _serviceUsuario;
         private readonly IServicePuja _servicePuja;
         private readonly IServiceResultadoSubasta _serviceResultadoSubasta;
+        private readonly IServicePago _servicePago;
 
         // Variable de usuario pra pruebas
         private const int IdUsuarioActualSimulado = 5;
@@ -23,13 +24,15 @@ namespace SubastaArte.web.Controllers
         public SubastaController(IServiceSubasta serviceSubasta,IServiceObjeto serviceObjeto,
                                  IServiceUsuario serviceUsuario,
                                  IServicePuja servicePuja,
-                                 IServiceResultadoSubasta serviceResultadoSubasta)
+                                 IServiceResultadoSubasta serviceResultadoSubasta, IServicePago servicePago)
         {
             _serviceSubasta = serviceSubasta;
             _serviceObjeto = serviceObjeto;
             _serviceUsuario = serviceUsuario;
             _servicePuja = servicePuja;
             _serviceResultadoSubasta = serviceResultadoSubasta;
+            _servicePago = servicePago;
+
         }
 
         [HttpGet]
@@ -414,6 +417,15 @@ namespace SubastaArte.web.Controllers
 
             await _serviceSubasta.ChangeEstadoAsync(id, idEstadoSubasta);
 
+            if (idEstadoSubasta == 2)
+            {
+                var resultado = await _serviceResultadoSubasta.RegistrarResultadoAsync(id, DateTime.Now);
+                if (resultado != null)
+                {
+                    await _servicePago.RegistrarPagoPendienteAsync(id);
+                }
+            }
+
             TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
                 "Estado actualizado",
                 $"El estado de la subasta ha sido modificado exitosamente.",
@@ -620,11 +632,10 @@ namespace SubastaArte.web.Controllers
                     });
                 }
 
+                // AQUÍ VA EL PASO 9:
+                await _servicePago.RegistrarPagoPendienteAsync(request.IdSubasta);
+
                 var nombreGanador = $"{resultado.IdUsuarioGanadorNavigation.Nombre} {resultado.IdUsuarioGanadorNavigation.Apellido1} {resultado.IdUsuarioGanadorNavigation.Apellido2}".Trim();
-                if (string.IsNullOrWhiteSpace(nombreGanador))
-                {
-                    nombreGanador = $"Usuario #{resultado.IdUsuario}";
-                }
 
                 return Json(new
                 {
@@ -638,9 +649,11 @@ namespace SubastaArte.web.Controllers
                         idUsuario = resultado.IdUsuario,
                         usuarioGanador = nombreGanador,
                         montoFinal = resultado.MontoFinal,
-                        fechaCierre = resultado.FechaCierre.ToString("dd/MM/yyyy HH:mm:ss")
+                        fechaCierre = resultado.FechaCierre.ToString("dd/MM/yyyy HH:mm:ss"),
+                        pagoEstado = "Pendiente"
                     }
                 });
+
             }
             catch
             {

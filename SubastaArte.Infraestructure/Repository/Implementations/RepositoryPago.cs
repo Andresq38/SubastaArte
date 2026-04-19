@@ -19,18 +19,56 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
             _context = context;
         }
 
-        public Task<Pago?> FindByIdAsync(int id)
+        public async Task<int> AddAsync(Pago entity)
         {
-            throw new NotImplementedException();
+            await _context.Set<Pago>().AddAsync(entity);
+            await _context.SaveChangesAsync();
+            return entity.IdPago;
+        }
+
+        public async Task ConfirmarPagoAsync(int idSubasta)
+        {
+            var pago = await _context.Set<Pago>()
+                .FirstOrDefaultAsync(x => x.IdSubasta == idSubasta);
+
+            if (pago == null)
+            {
+                throw new InvalidOperationException("No existe pago asociado a la subasta.");
+            }
+
+            if (!string.Equals(pago.EstadoPago, "Pendiente", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            pago.EstadoPago = "Confirmado";
+            pago.FechaPago = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Pago?> FindByIdAsync(int id)
+        {
+            return await _context.Set<Pago>()
+                .Where(x => x.IdPago == id)
+                .Include(x => x.IdSubastaNavigation)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Pago?> FindBySubastaIdAsync(int idSubasta)
+        {
+            return await _context.Set<Pago>()
+                .Where(x => x.IdSubasta == idSubasta)
+                .Include(x => x.IdSubastaNavigation)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<ICollection<Pago>> ListAsync()
         {
-            //Select * from Pago
-            var collection = await _context.Set<Pago>()
+            return await _context.Set<Pago>()
+                .Include(x => x.IdSubastaNavigation)
                 .AsNoTracking()
                 .ToListAsync();
-            return collection;
         }
     }
 }

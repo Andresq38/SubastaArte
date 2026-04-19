@@ -1,0 +1,113 @@
+﻿@model IEnumerable<SubastaArte.web.ViewModels.PagoListadoItemViewModel>
+
+@{
+    ViewData["Title"] = "Pagos";
+    var filtroActual = (ViewBag.FiltroActual as string ?? "pendientes").ToLowerInvariant();
+}
+
+<nav class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Inicio</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Pagos</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h3 mb-1">Gestión de pagos</h1>
+        <p class="text-muted mb-0">Consulte pagos por estado y confirme los pendientes.</p>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-3">
+    <div class="card-body py-2">
+        <div class="btn-group" role="group" aria-label="Filtro pagos">
+            <a asp-controller="Pago" asp-action="Index" asp-route-filtro="todas"
+               class="btn @(filtroActual == "todas" ? "btn-primary" : "btn-outline-primary")">
+                Todas
+            </a>
+            <a asp-controller="Pago" asp-action="Index" asp-route-filtro="pendientes"
+               class="btn @(filtroActual == "pendientes" ? "btn-warning" : "btn-outline-warning")">
+                Pendientes
+            </a>
+            <a asp-controller="Pago" asp-action="Index" asp-route-filtro="pagadas"
+               class="btn @(filtroActual == "pagadas" ? "btn-success" : "btn-outline-success")">
+                Pagadas
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-secondary mb-0">
+                No hay pagos para el filtro seleccionado.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Subasta</th>
+                            <th>Ganador</th>
+                            <th class="text-end">Monto final</th>
+                            <th>Fecha cierre</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var esPendiente = string.Equals(item.EstadoPago, "Pendiente", StringComparison.OrdinalIgnoreCase);
+
+                            <tr>
+                                <td>@item.NombreSubasta</td>
+                                <td>@item.NombreGanador</td>
+                                <td class="text-end">@item.MontoFinal.ToString("₡#,##0.00")</td>
+                                <td>
+                                    @(item.FechaCierre == DateTime.MinValue
+                                                                ? "-"
+                                                                : item.FechaCierre.ToString("dd/MM/yyyy HH:mm:ss"))
+                        </td>
+                        <td>
+                            @if (esPendiente)
+                                    {
+                                        <span class="badge text-bg-warning">Pendiente</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-success">Confirmado</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (esPendiente)
+                                    {
+                                        <form asp-controller="Pago" asp-action="Confirmar" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="idSubasta" value="@item.IdSubasta" />
+                                            <input type="hidden" name="filtro" value="@filtroActual" />
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="bi bi-check2-circle me-1"></i> Confirmar pago
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Sin acción</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
