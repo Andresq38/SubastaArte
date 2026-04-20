@@ -632,7 +632,6 @@ namespace SubastaArte.web.Controllers
                     });
                 }
 
-                // AQUÍ VA EL PASO 9:
                 await _servicePago.RegistrarPagoPendienteAsync(request.IdSubasta);
 
                 var nombreGanador = $"{resultado.IdUsuarioGanadorNavigation.Nombre} {resultado.IdUsuarioGanadorNavigation.Apellido1} {resultado.IdUsuarioGanadorNavigation.Apellido2}".Trim();

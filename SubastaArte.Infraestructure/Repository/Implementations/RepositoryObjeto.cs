@@ -151,6 +151,7 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                                        .Include(x => x.Subasta)
                                             .ThenInclude(y => y.IdEstadoSubastaNavigation)
                                        .AsNoTracking()
+                                       .AsSplitQuery()
                                        .ToListAsync();
             return collection;
         }

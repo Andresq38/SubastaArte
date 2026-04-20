@@ -103,15 +103,21 @@
     <script>
         $(document).ready(function() {
             // CONFIGURAR FECHAS CORRECTAMENTE
-            const now = new Date();
-            const today = now.toISOString().slice(0, 16);
+        const now = new Date();
+        now.setSeconds(0, 0); // redondear al minuto para datetime-local
 
-            const fechaInicioInput = $('input[name="FechaInicio"]');
-            const fechaCierreInput = $('input[name="FechaCierre"]');
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const today = `${year}-${month}-${day}T${hours}:${minutes}`;
 
-            // Establecer fecha de hoy como valor por defecto Y bloquear fechas pasadas
-            fechaInicioInput.val(today).attr('min', today);
-            fechaCierreInput.attr('min', today);
+        const fechaInicioInput = $('input[name="FechaInicio"]');
+        const fechaCierreInput = $('input[name="FechaCierre"]');
+
+        fechaInicioInput.val(today).attr('min', today);
+        fechaCierreInput.attr('min', today);
 
             // Cuando cambie fecha inicio, actualizar mínimo de fecha cierre
             fechaInicioInput.on('change', function() {
@@ -173,6 +179,7 @@
                 } else {
                     const fechaInicioDate = new Date(fechaInicio);
                     const nowCheck = new Date();
+                    nowCheck.setSeconds(0, 0);
                     if (fechaInicioDate < nowCheck) {
                         $('#fechaInicio-custom-error').text('La fecha de inicio debe ser mayor a la fecha actual').show();
                         isValid = false;

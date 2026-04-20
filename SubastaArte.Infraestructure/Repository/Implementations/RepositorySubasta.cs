@@ -103,6 +103,7 @@ namespace SubastaArte.Infraestructure.Repository.Implementations
                 .Include(x => x.IdVendedorNavigation)
                 .Include(x => x.Puja)
                 .AsNoTracking()
+                .AsSplitQuery()
                 .ToListAsync();
             return collection;
         }
